@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  self-vault-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: self-vault-server
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - VAULT_DATA_DIR=/data
+    volumes:
+      - ./vault-data:/data

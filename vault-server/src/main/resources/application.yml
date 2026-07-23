@@ -1,0 +1,19 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: self-vault-server
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    platform: h2
+    initialization-mode: always
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
