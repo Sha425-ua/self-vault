@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class KeyDerivationService {
 
-    public static byte[] generatedSalt() {
+    public static byte[] generateSalt() {
         byte[] salt = new byte[16];
         SecureRandom random = new SecureRandom();
         random.nextBytes(salt);
