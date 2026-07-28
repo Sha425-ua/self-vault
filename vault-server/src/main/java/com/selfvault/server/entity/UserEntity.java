@@ -1,5 +1,6 @@
 package com.selfvault.server.entity;
 
+import com.selfvault.domain.model.RegisterRequestDto;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,9 +18,17 @@ public class UserEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column(name = "auth_cash", nullable = false)
-    private String authCash;
+    @Column(name = "auth_hash", nullable = false)
+    private String authHash;
 
     @Column(nullable = false)
     private String salt;
+
+    public static UserEntity fromDto(RegisterRequestDto dto) {
+        UserEntity entity = new UserEntity();
+        entity.setUsername(dto.username());
+        entity.setAuthHash(dto.authHash());
+        entity.setSalt(dto.salt());
+        return entity;
+    }
 }
