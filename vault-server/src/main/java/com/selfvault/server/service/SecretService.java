@@ -19,4 +19,13 @@ public class SecretService {
 
         repository.save(entity);
     }
+
+    public void deleteSecret(String username, String title) {
+        boolean isEntityExists = repository.existsByUsernameAndTitle(username, title);
+        if (!isEntityExists) {
+            throw new IllegalArgumentException("Secret with title " + title + " for user " + username + " does not exist.");
+        }
+
+        repository.deleteByUsernameAndTitle(username, title);
+    }
 }

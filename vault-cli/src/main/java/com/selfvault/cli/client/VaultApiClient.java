@@ -95,4 +95,28 @@ public class VaultApiClient {
             throw new RuntimeException(e);
         }
     }
+
+    public void deleteSecret(String username, String authHash, String title) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(serverUrl + "/api/secret/delete?title=" + title))
+                    .header("X-Username", username)
+                    .header("X-Auth-Hash", authHash)
+                    .DELETE()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            switch (response.statusCode()) {
+                case 200 -> System.out.println("Secret deleted successfully.");
+                case 401 -> throw new AuthException("Invalid password");
+                case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
+                case 400 -> throw new ServerException("Bad request: " + response.body());
+                case 500 -> throw new ServerException("Internal server error");
+                default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

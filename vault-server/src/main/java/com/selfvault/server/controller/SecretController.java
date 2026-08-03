@@ -37,4 +37,20 @@ public class SecretController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Secret from " + username + " saved successfully!");
     }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteSecret(
+            @RequestHeader("X-Auth-Hash") String authHash,
+            @RequestHeader("X-Username") String username,
+            @RequestParam("title") String title) {
+        log.info("Received new request to delete secret for user {} with title {}",
+                username, title);
+
+        secretService.deleteSecret(username, title);
+
+        log.info("Secret with title {} for user {} deleted successfully",
+                title, username);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
