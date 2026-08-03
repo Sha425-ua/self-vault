@@ -37,7 +37,9 @@ public class KeyDerivationService {
 
     public static byte[] deriveKey(char[] password, byte[] salt) {
         Argon2Parameters parameters = buildParameters(salt);
-        return generateKey(password, parameters);
+        byte[] masterKey = generateKey(password, parameters);
+        wipe(password);
+        return masterKey;
     }
 
     public static void wipe(byte[] array) {
