@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/register")
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("unused")
 public class RegistrationController {
     private final UserService service;
 
@@ -22,9 +23,9 @@ public class RegistrationController {
     public ResponseEntity<String> register(@RequestBody RegisterRequestDto dto) {
         log.info("""
                 Received new request to registration.
-                Username: {}
-                AuthHash: {}
-                Salt: {}
+                    Username: {}
+                    AuthHash: {}
+                    Salt: {}
                 """, dto.username(), dto.authHash(), dto.salt());
 
         service.registerUser(dto);

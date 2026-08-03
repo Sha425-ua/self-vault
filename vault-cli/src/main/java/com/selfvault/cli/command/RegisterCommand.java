@@ -2,6 +2,7 @@ package com.selfvault.cli.command;
 
 import com.selfvault.cli.service.RegisterService;
 import com.selfvault.crypto.KeyDerivationService;
+import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 import java.io.Console;
@@ -10,6 +11,14 @@ import java.util.Scanner;
 
 @Command(name = "register", description = "Регистрация нового пользователя")
 public class RegisterCommand implements Runnable {
+    private final RegisterService registerService;
+
+    public RegisterCommand(RegisterService registerService) {
+        this.registerService = registerService;
+    }
+
+    @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Имя пользователя для регистрации")
+    private String username;
 
     @Override
     public void run() {
@@ -18,8 +27,10 @@ public class RegisterCommand implements Runnable {
 
         System.out.println("New user registration. More details in MkDocs.");
 
-        System.out.print("Enter username: ");
-        String username = scanner.nextLine();
+        if (username == null || username.isEmpty()) {
+            System.out.print("Enter username: ");
+            username = scanner.nextLine();
+        }
 
         System.out.print("Enter password: ");
         char[] firstPassword = (console != null)
@@ -31,13 +42,16 @@ public class RegisterCommand implements Runnable {
                 ? console.readPassword()
                 : scanner.nextLine().toCharArray();
 
-        if (firstPassword == secondPassword) {
-            Arrays.fill(firstPassword, (char) 0);
+        if (Arrays.equals(firstPassword, secondPassword)) {
+            KeyDerivationService.wipe(firstPassword);
 
             try {
-                RegisterService.register(username, secondPassword);
+                registerService.register(username, secondPassword);
             } catch (Exception e) {
                 throw new RuntimeException(e);
+            } finally {
+                KeyDerivationService.wipe(secondPassword);
+                KeyDerivationService.wipe(firstPassword);
             }
         }
     }

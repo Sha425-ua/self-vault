@@ -1,16 +1,20 @@
 package com.selfvault.cli.service;
 
 import com.selfvault.cli.client.VaultApiClient;
-import com.selfvault.crypto.AesEncryptionService;
 import com.selfvault.crypto.AuthHashService;
 import com.selfvault.crypto.KeyDerivationService;
-import com.selfvault.crypto.utils.TypeConverter;
 import com.selfvault.domain.model.RegisterRequestDto;
 
-import java.util.Arrays;
+import java.util.Base64;
 
 public class RegisterService {
-    public static void register(String username, char[] masterPassword) throws Exception {
+    private final VaultApiClient apiClient;
+
+    public RegisterService(VaultApiClient apiClient) {
+        this.apiClient = apiClient;
+    }
+
+    public void register(String username, char[] masterPassword) throws Exception {
         byte[] salt = KeyDerivationService.generateSalt();
         byte[] masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
 
@@ -21,9 +25,9 @@ public class RegisterService {
         RegisterRequestDto dto = new RegisterRequestDto(
                 username,
                 authHash,
-                Arrays.toString(TypeConverter.byteArrayToCharArray(salt))
+                Base64.getEncoder().encodeToString(salt)
         );
 
-        VaultApiClient vaultApiClient = new VaultApiClient("http://192.168.1.50:8085");
+        apiClient.register(dto);
     }
 }
