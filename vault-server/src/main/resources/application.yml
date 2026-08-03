@@ -13,6 +13,10 @@ spring:
     platform: h2
     initialization-mode: always
 
+  h2:
+    console:
+      enabled: true
+
   jpa:
     hibernate:
       ddl-auto: update
