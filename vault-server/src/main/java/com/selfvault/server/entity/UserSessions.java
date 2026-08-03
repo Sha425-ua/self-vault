@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @NoArgsConstructor
+@SuppressWarnings("unused")
 public class UserSessions {
 
     @Id

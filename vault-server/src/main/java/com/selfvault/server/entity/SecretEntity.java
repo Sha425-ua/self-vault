@@ -10,18 +10,18 @@ import lombok.Setter;
 @Setter
 @Table(name = "secrets")
 @NoArgsConstructor
-public class SecretsEntity {
+public class SecretEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
     private String title;
 
     @Column(name = "encrypted_data", nullable = false)
     private String encryptedData;
-
-    @Column(nullable = false)
-    private String iv;
 }
