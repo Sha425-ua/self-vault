@@ -6,6 +6,8 @@ import com.selfvault.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import com.selfvault.domain.exception.UserNotFoundException;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -18,5 +20,10 @@ public class UserService {
 
         UserEntity entity = UserEntity.fromDto(dto);
         repository.save(entity);
+    }
+
+    public String getUserSalt(String username) {
+        return repository.findSaltByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 }
