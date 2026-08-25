@@ -26,6 +26,7 @@ public class GetSecretCommand implements Runnable {
         Console console = System.console();
         Scanner scanner = new Scanner(System.in);
 
+        System.out.print("Please enter your master password to delete the secret: ");
         char[] masterPassword = (console != null)
                 ? console.readPassword()
                 : scanner.nextLine().toCharArray();
@@ -35,12 +36,20 @@ public class GetSecretCommand implements Runnable {
         try {
             secret = service.getDecryptedSecret(username, title, masterPassword);
 
-            System.out.println("┌── [ Secret: " + title + " ] ──────────────────────────┐");
-            System.out.println("│ User:     " + String.format("%-36s", username) + " │");
+            int totalWidth = 48;
+
+            String header = "┌── [ Secret: " + title + " ] ";
+            int dashesCount = Math.max(0, totalWidth - header.length() - 1);
+            System.out.println(header + "─".repeat(dashesCount) + "┐");
+
+            System.out.println(String.format("│ User:     %-34s │", username));
+
+            int passwordPadding = Math.max(0, 34 - secret.length);
             System.out.print("│ Password: ");
             System.out.print(secret);
-            System.out.println();
-            System.out.println("└────────────────────────────────────────────────┘");
+            System.out.println(" ".repeat(passwordPadding) + " │");
+
+            System.out.println("└" + "─".repeat(totalWidth - 2) + "┘");
 
         } catch (Exception e) {
             System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
