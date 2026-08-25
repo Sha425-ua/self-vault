@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/secret")
 @RequiredArgsConstructor
@@ -28,7 +30,6 @@ public class SecretController {
 
         authService.authUser(username, authHash);
 
-
         secretService.saveSecret(username, dto);
 
         log.info("New secret with title {} for user {} saved successfully",
@@ -46,11 +47,44 @@ public class SecretController {
         log.info("Received new request to delete secret for user {} with title {}",
                 username, title);
 
+        authService.authUser(username, authHash);
+
         secretService.deleteSecret(username, title);
 
         log.info("Secret with title {} for user {} deleted successfully",
                 title, username);
 
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @GetMapping("/list")
+    public ResponseEntity<List<String>> getListSecrets(
+            @RequestHeader("X-Auth-Hash") String authHash,
+            @RequestHeader("X-Username") String username) {
+
+        log.info("Received new request to get secrets for user {}",
+                username);
+
+        authService.authUser(username, authHash);
+
+        List<String> secretTitles = secretService.getSecretTitles(username);
+
+        log.info("Secrets for user {} retrieved successfully",
+                username);
+
+        return ResponseEntity.ok(secretTitles);
+    }
+
+    @GetMapping("/get")
+    public ResponseEntity<String> getEncryptedSecret(
+            @RequestHeader("X-Auth-Hash") String authHash,
+            @RequestHeader("X-Username") String username,
+            @RequestParam("title") String title) {
+
+        authService.authUser(username, authHash);
+
+        String encryptedData = secretService.getEncryptedData(username, title);
+        return ResponseEntity.ok(encryptedData);
+
     }
 }

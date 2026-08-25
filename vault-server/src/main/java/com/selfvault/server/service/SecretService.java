@@ -1,10 +1,13 @@
 package com.selfvault.server.service;
 
+import com.selfvault.domain.exception.UserNotFoundException;
 import com.selfvault.domain.model.SecretRequestDto;
 import com.selfvault.server.entity.SecretEntity;
 import com.selfvault.server.repository.SecretRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,5 +30,13 @@ public class SecretService {
         }
 
         repository.deleteByUsernameAndTitle(username, title);
+    }
+
+    public List<String> getSecretTitles(String username) {
+        return repository.getTitlesByUsername(username);
+    }
+
+    public String getEncryptedData(String username, String title) {
+        return repository.getEncryptedData(username, title).orElseThrow(() -> new UserNotFoundException("Secret '" + title + "' not found."));
     }
 }

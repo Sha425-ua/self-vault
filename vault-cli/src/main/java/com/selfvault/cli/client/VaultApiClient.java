@@ -1,5 +1,6 @@
 package com.selfvault.cli.client;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.selfvault.domain.exception.AuthException;
 import com.selfvault.domain.exception.ServerException;
@@ -10,10 +11,13 @@ import com.selfvault.domain.model.SecretRequestDto;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.List;
 
 public class VaultApiClient {
     private final HttpClient httpClient;
@@ -40,13 +44,13 @@ public class VaultApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             switch (response.statusCode()) {
-                case 200, 201 -> System.out.println("User register successfully.");
+                case 200, 201 -> {}
                 case 500 -> throw new ServerException("Internal server error");
                 case 400, 409 -> throw new ServerException("Bad request: " + response.body());
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
-        } catch (Exception e) {
-            System.err.println("Error while connection: " + e.getMessage());
+        } catch (IOException | InterruptedException e) {
+            throw new ServerException("Network connection failed: " + e.getMessage());
         }
     }
 
@@ -67,7 +71,7 @@ public class VaultApiClient {
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException("Network error while getting salt: " + e.getMessage(), e);
+            throw new ServerException("Network connection failed: " + e.getMessage());
         }
     }
 
@@ -85,6 +89,7 @@ public class VaultApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             switch (response.statusCode()) {
+                case 200, 201 -> {}
                 case 401 -> throw new AuthException("Invalid password");
                 case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
                 case 400, 409 -> throw new ServerException("Bad request: " + response.body());
@@ -92,14 +97,16 @@ public class VaultApiClient {
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new ServerException("Network connection failed: " + e.getMessage());
         }
     }
 
     public void deleteSecret(String username, String authHash, String title) {
         try {
+            String encodedTitle = URLEncoder.encode(title, StandardCharsets.UTF_8);
+
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(serverUrl + "/api/secret/delete?title=" + title))
+                    .uri(URI.create(serverUrl + "/api/secret/delete?title=" + encodedTitle))
                     .header("X-Username", username)
                     .header("X-Auth-Hash", authHash)
                     .DELETE()
@@ -108,7 +115,7 @@ public class VaultApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             switch (response.statusCode()) {
-                case 200 -> System.out.println("Secret deleted successfully.");
+                case 200, 204 -> {}
                 case 401 -> throw new AuthException("Invalid password");
                 case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
                 case 400 -> throw new ServerException("Bad request: " + response.body());
@@ -116,7 +123,59 @@ public class VaultApiClient {
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
         } catch (IOException | InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new ServerException("Network connection failed: " + e.getMessage());
+        }
+    }
+
+    public List<String> listSecrets(String username, String authHash) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(serverUrl + "/api/secret/list"))
+                    .header("X-Username", username)
+                    .header("X-Auth-Hash", authHash)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            switch (response.statusCode()) {
+                case 200 -> {
+                    return objectMapper.readValue(
+                            response.body(),
+                            objectMapper.getTypeFactory().constructCollectionType(List.class, String.class)
+                    );
+                }
+                case 401 -> throw new AuthException("Invalid password");
+                case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
+                case 500 -> throw new ServerException("Internal server error");
+                default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new ServerException("Network connection failed: " + e.getMessage());
+        }
+    }
+
+    public String getEncryptedSecret(String username, String title, String authHash) {
+        String encodedTitle = URLEncoder.encode(title, StandardCharsets.UTF_8);
+
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(serverUrl + "/api/secret/get?title=" + encodedTitle))
+                    .headers("X-Username", username, "X-Auth-Hash", authHash)
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            switch (response.statusCode()) {
+                case 200 -> { return response.body(); }
+                case 401 -> throw new AuthException("Invalid password");
+                case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
+                case 500 -> throw new ServerException("Internal server error");
+                default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new ServerException("Network connection failed: " + e.getMessage());
         }
     }
 }

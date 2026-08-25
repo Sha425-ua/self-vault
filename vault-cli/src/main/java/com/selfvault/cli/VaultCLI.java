@@ -1,9 +1,7 @@
 package com.selfvault.cli;
 
 import com.selfvault.cli.client.VaultApiClient;
-import com.selfvault.cli.command.AddSecretCommand;
-import com.selfvault.cli.command.DeleteSecretCommand;
-import com.selfvault.cli.command.RegisterCommand;
+import com.selfvault.cli.command.*;
 import com.selfvault.cli.service.AuthenticateService;
 import com.selfvault.cli.service.RegisterService;
 import com.selfvault.cli.service.SecretService;
@@ -26,7 +24,9 @@ public class VaultCLI implements Runnable {
         CommandLine commandLine = new CommandLine(new VaultCLI())
                 .addSubcommand("register", new RegisterCommand(registerService))
                 .addSubcommand("add", new AddSecretCommand(secretService))
-                .addSubcommand("delete", new DeleteSecretCommand(secretService));
+                .addSubcommand("delete", new DeleteSecretCommand(secretService))
+                .addSubcommand("list", new ListCommand(secretService))
+                .addSubcommand("get", new GetSecretCommand(secretService));
 
         int exitCode = commandLine.execute(args);
         System.exit(exitCode);
