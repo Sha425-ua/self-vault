@@ -1,6 +1,7 @@
 package com.selfvault.server.exeption;
 
 import com.selfvault.domain.exception.AuthException;
+import com.selfvault.domain.exception.SecretNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -20,5 +21,11 @@ public class ExceptionHandler {
     @SuppressWarnings("unused")
     public ResponseEntity<String> handleAuthException(AuthException exception) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exception.getMessage());
+    }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(SecretNotFoundException.class)
+    @SuppressWarnings("unused")
+    public ResponseEntity<String> handleSecretNotFound(SecretNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exception.getMessage());
     }
 }
