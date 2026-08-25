@@ -62,14 +62,14 @@ public class SecretController {
             @RequestHeader("X-Auth-Hash") String authHash,
             @RequestHeader("X-Username") String username) {
 
-        log.info("Received new request to get secrets for user {}",
+        log.info("Received new request to get list of secrets for user {}",
                 username);
 
         authService.authUser(username, authHash);
 
         List<String> secretTitles = secretService.getSecretTitles(username);
 
-        log.info("Secrets for user {} retrieved successfully",
+        log.info("Secrets for user {} retrieved successfully.",
                 username);
 
         return ResponseEntity.ok(secretTitles);
@@ -81,9 +81,14 @@ public class SecretController {
             @RequestHeader("X-Username") String username,
             @RequestParam("title") String title) {
 
+        log.info("Received new request to get secret data for user {}.",
+                username);
+
         authService.authUser(username, authHash);
 
         String encryptedData = secretService.getEncryptedData(username, title);
+        log.info("Encrypted data was found for user {}.", username);
+
         return ResponseEntity.ok(encryptedData);
 
     }

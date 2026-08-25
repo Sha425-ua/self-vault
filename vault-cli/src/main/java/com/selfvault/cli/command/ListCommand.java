@@ -24,6 +24,7 @@ public class ListCommand implements Runnable {
         Scanner scanner = new Scanner(System.in);
         Console console = System.console();
 
+        System.out.print("Please enter your master password to delete the secret: ");
         char[] masterPassword = (console != null)
                 ? console.readPassword()
                 : scanner.nextLine().toCharArray();
