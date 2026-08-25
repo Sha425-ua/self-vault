@@ -30,7 +30,6 @@ public class AddSecretCommand implements Runnable {
         Console console = System.console();
         Scanner scanner = new Scanner(System.in);
 
-
         System.out.print("Please enter your master password to encrypt the secret: ");
         char[] masterPassword = (console != null)
                 ? console.readPassword()
@@ -41,7 +40,7 @@ public class AddSecretCommand implements Runnable {
 
             System.out.println("Secret " + title + " successfully added!");
         } catch (Exception e) {
-            System.out.println("Error adding secret: " + e.getMessage());
+            System.err.println("Error adding secret: " + e.getMessage());
         }
     }
 }

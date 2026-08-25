@@ -20,6 +20,9 @@ public class RegisterCommand implements Runnable {
     @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Имя пользователя для регистрации")
     private String username;
 
+    // TODO: После получения первой копии пароля сразу получать из него хеш и затирать массив пароля,
+    //  затем сравнивать хеши, а не массивы паролей. Это позволит избежать хранения пароля в памяти в открытом виде.
+
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
@@ -47,6 +50,7 @@ public class RegisterCommand implements Runnable {
 
             try {
                 registerService.register(username, secondPassword);
+                System.out.println("User " + username + " successfully registered!");
             } catch (Exception e) {
                 throw new RuntimeException(e);
             } finally {

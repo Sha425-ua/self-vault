@@ -4,9 +4,6 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.Arrays;
 
@@ -39,9 +36,8 @@ public class AesEncryptionService {
 
             return result;
         } finally {
-            if (secretBytes != null) {
-                Arrays.fill(secretBytes, (byte) 0);
-            }
+            KeyDerivationService.wipe(secretBytes);
+            KeyDerivationService.wipe(secretToEncrypt);
         }
     }
 
@@ -59,9 +55,8 @@ public class AesEncryptionService {
             plainBytes = cipher.doFinal(cipherText);
             return byteArrayToCharArray(plainBytes);
         } finally {
-            if (plainBytes != null) {
-                Arrays.fill(plainBytes, (byte) 0);
-            }
+            KeyDerivationService.wipe(plainBytes);
+            KeyDerivationService.wipe(encryptedBytes);
         }
     }
 }
