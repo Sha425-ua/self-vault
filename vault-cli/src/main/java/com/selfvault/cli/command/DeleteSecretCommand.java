@@ -8,8 +8,8 @@ import picocli.CommandLine;
 import java.io.Console;
 import java.util.Scanner;
 
-@CommandLine.Command(name = "delete", description = "Delete a secret from the vault.")
-public class DeleteSecretCommand {
+@CommandLine.Command(name = "delete", description = "Delete a secret from the vault")
+public class DeleteSecretCommand implements Runnable {
     private final SecretService service;
 
     @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Registered username")
@@ -33,13 +33,11 @@ public class DeleteSecretCommand {
 
         try {
             service.deleteSecret(username, title, password);
-            System.out.println("Secret with title: " + title + " successfully deleted for user: " + username);
+            System.out.println("Secret with title " + title + " successfully deleted for user " + username + ".");
         } catch (Exception e) {
-            System.out.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+            System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
         } finally {
             KeyDerivationService.wipe(password);
         }
-
-        System.out.println("Deleting secret with title: " + title + " for user: " + username);
     }
 }
