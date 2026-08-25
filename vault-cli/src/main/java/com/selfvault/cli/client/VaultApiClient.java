@@ -1,8 +1,8 @@
 package com.selfvault.cli.client;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.selfvault.domain.exception.AuthException;
+import com.selfvault.domain.exception.SecretNotFoundException;
 import com.selfvault.domain.exception.ServerException;
 import com.selfvault.domain.exception.UserNotFoundException;
 import com.selfvault.domain.model.RegisterRequestDto;
@@ -170,7 +170,7 @@ public class VaultApiClient {
             switch (response.statusCode()) {
                 case 200 -> { return response.body(); }
                 case 401 -> throw new AuthException("Invalid password");
-                case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
+                case 404 -> throw new SecretNotFoundException("Secret not found for user " + username + ".");
                 case 500 -> throw new ServerException("Internal server error");
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
