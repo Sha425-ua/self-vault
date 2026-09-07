@@ -1,5 +1,3 @@
-import sun.jvmstat.monitor.MonitoredVmUtil.jvmArgs
-
 plugins {
     java
     id("org.springframework.boot") version "3.4.1" apply false
