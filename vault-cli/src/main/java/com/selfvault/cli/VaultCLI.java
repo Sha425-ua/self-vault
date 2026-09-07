@@ -1,16 +1,17 @@
 package com.selfvault.cli;
 
-import com.selfvault.cli.client.VaultApiClient;
 import com.selfvault.cli.command.*;
-import com.selfvault.cli.service.AuthenticateService;
-import com.selfvault.cli.service.RegisterService;
-import com.selfvault.cli.service.SecretService;
+import com.selfvault.client.service.AuthenticateService;
+import com.selfvault.client.service.RegisterService;
+import com.selfvault.client.service.SecretService;
 import picocli.CommandLine;
+
+import com.selfvault.client.*;
 
 @CommandLine.Command(
         name = "self-vault",
         mixinStandardHelpOptions = true,
-        version = "self-vault 1.0.0",
+        version = "self-vault 1.0.1",
         description = "Self-Vault secure storage of secrets and passwords."
 )
 public class VaultCLI implements Runnable {

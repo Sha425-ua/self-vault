@@ -4,5 +4,6 @@ include(
     "vault-crypto",
     "vault-domain",
     "vault-server",
-    "vault-cli"
+    "vault-cli",
+    "vault-client"
 )

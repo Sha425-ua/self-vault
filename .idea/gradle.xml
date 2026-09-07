@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/vault-cli" />
+            <option value="$PROJECT_DIR$/vault-client" />
             <option value="$PROJECT_DIR$/vault-crypto" />
             <option value="$PROJECT_DIR$/vault-domain" />
             <option value="$PROJECT_DIR$/vault-server" />

@@ -1,6 +1,6 @@
 package com.selfvault.cli.command;
 
-import com.selfvault.cli.service.SecretService;
+import com.selfvault.client.service.SecretService;
 import com.selfvault.crypto.KeyDerivationService;
 import picocli.CommandLine;
 
