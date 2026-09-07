@@ -16,7 +16,7 @@ class AesEncryptionServiceTest {
         byte[] masterKey = new byte[32];
         new SecureRandom().nextBytes(masterKey);
 
-        byte[] encryptedSecret = AesEncryptionService.encryptSecret(originalSecret, masterKey);
+        byte[] encryptedSecret = AesEncryptionService.encryptSecret(originalSecret.clone(), masterKey);
         char[] decryptedSecret = AesEncryptionService.decryptSecrets(encryptedSecret, masterKey);
 
         assertArrayEquals(originalSecret, decryptedSecret, "Decrypted password must be equals with original.");

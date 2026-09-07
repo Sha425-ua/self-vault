@@ -1,4 +1,4 @@
-package com.selfvault.cli.client;
+package com.selfvault.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.selfvault.domain.exception.AuthException;

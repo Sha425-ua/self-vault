@@ -1,6 +1,6 @@
-package com.selfvault.cli.service;
+package com.selfvault.client.service;
 
-import com.selfvault.cli.client.VaultApiClient;
+import com.selfvault.client.VaultApiClient;
 import com.selfvault.domain.model.RegisterRequestDto;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

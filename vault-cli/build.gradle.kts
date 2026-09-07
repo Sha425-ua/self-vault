@@ -22,6 +22,6 @@ tasks.jar {
 dependencies {
     implementation(project(":vault-crypto"))
     implementation(project(":vault-domain"))
+    implementation(project(":vault-client"))
     implementation("info.picocli:picocli:4.7.6")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
 }

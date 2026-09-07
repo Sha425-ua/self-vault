@@ -1,6 +1,6 @@
 package com.selfvault.cli.command;
 
-import com.selfvault.cli.service.RegisterService;
+import com.selfvault.client.service.RegisterService;
 import com.selfvault.crypto.KeyDerivationService;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;

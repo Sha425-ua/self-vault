@@ -1,12 +1,11 @@
-package com.selfvault.cli.service;
+package com.selfvault.client.service;
 
-import com.selfvault.cli.client.VaultApiClient;
+import com.selfvault.client.VaultApiClient;
 import com.selfvault.crypto.AesEncryptionService;
 import com.selfvault.crypto.AuthHashService;
 import com.selfvault.crypto.KeyDerivationService;
 import com.selfvault.domain.model.SecretRequestDto;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
