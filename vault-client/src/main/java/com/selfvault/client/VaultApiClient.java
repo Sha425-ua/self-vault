@@ -21,7 +21,7 @@ import java.util.List;
 
 public class VaultApiClient {
     private final HttpClient httpClient;
-    private final String serverUrl;
+    private String serverUrl;
     private final ObjectMapper objectMapper;
 
     public VaultApiClient(String serverUrl) {
@@ -30,6 +30,14 @@ public class VaultApiClient {
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
         this.serverUrl = serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
     }
 
     public void register(RegisterRequestDto dto) {
