@@ -10,6 +10,8 @@ fun main() {
     System.setProperty("skiko.linux.autodetect", "true")
     System.setProperty("sun.java2d.opengl", "true")
 
+    val appContainer = AppContainer()
+
     application {
         Window(
             onCloseRequest = ::exitApplication,
@@ -23,7 +25,7 @@ fun main() {
                     }
                 })
             }
-            App()
+            App(appContainer = appContainer)
         }
     }
 }

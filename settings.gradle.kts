@@ -13,5 +13,6 @@ include(
     "vault-domain",
     "vault-server",
     "vault-cli",
-    "vault-desktop"
+    "vault-desktop",
+    "vault-client"
 )

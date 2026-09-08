@@ -17,6 +17,7 @@ kotlin {
 dependencies {
     implementation(project(":vault-domain"))
     implementation(project(":vault-crypto"))
+    implementation(project(":vault-client"))
 
     // Compose Desktop:
     implementation(compose.desktop.currentOs)
@@ -25,6 +26,9 @@ dependencies {
 
     // Jackson JSON parser:
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+
+    // Coroutine
+    // implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
 }
 
 compose.desktop {

@@ -1,17 +1,21 @@
 package com.selfvault.desktop.ui.screens.login
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicSecureTextField
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
@@ -26,17 +30,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
-import java.awt.Button
+import androidx.compose.ui.graphics.SolidColor
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    viewModel: LoginViewModel,
+    onLoginSuccess: () -> Unit = {}) {
     Box(
         Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
-
     ) {
+        var serverUrl by remember { mutableStateOf("http://localhost:8085") }
+        var username by remember { mutableStateOf("") }
+        var passwordState = rememberTextFieldState()
+        var isPasswordVisibility by remember { mutableStateOf(false) }
+
+        val state = viewModel.state
+
         Card(
             modifier = Modifier
                 .width(400.dp)
@@ -48,7 +58,7 @@ fun LoginScreen() {
             shape = RoundedCornerShape(30.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
+            )
         ) {
             Column(
                 verticalArrangement = Arrangement.Center,
@@ -77,11 +87,6 @@ fun LoginScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth(0.85f)
                 ) {
-                    var serverUrl by remember { mutableStateOf("http://localhost:8080") }
-                    var username by remember { mutableStateOf("") }
-                    var masterPassword by remember { mutableStateOf("") }
-                    var isPasswordVisibility by remember { mutableStateOf(false) }
-
                     OutlinedTextField(
                         value = serverUrl,
                         onValueChange = { serverUrl = it },
@@ -100,28 +105,51 @@ fun LoginScreen() {
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedTextField(
-                        value = masterPassword,
-                        onValueChange = { masterPassword = it },
-                        placeholder = { Text("Master Password") },
-                        singleLine = true,
-                        shape = RoundedCornerShape(30.dp),
-                        modifier = Modifier.fillMaxWidth(),
-
-                        visualTransformation = if (isPasswordVisibility)
-                            VisualTransformation.None
-                        else
-                            PasswordVisualTransformation(),
-
-                        trailingIcon = {
-                            IconButton(onClick = { isPasswordVisibility = !isPasswordVisibility }) {
-                                Icon(
-                                    imageVector = if (isPasswordVisibility) Icons.Default.VisibilityOff else Icons.Default.Visibility,
-                                    contentDescription = "Show password"
-                                )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outline,
+                                shape = RoundedCornerShape(30.dp)
+                            )
+                            .padding(start = 20.dp, end = 4.dp),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        BasicSecureTextField(
+                            state = passwordState,
+                            textObfuscationMode = if (isPasswordVisibility)
+                                TextObfuscationMode.Visible
+                            else
+                                TextObfuscationMode.RevealLastTyped,
+                            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                            textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 40.dp),
+                            decorator = { innerTextField ->
+                                if (passwordState.text.isEmpty()) {
+                                    Text(
+                                        text = "Master Password",
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                innerTextField()
                             }
-                        },
-                    )
+                        )
+                        IconButton(
+                            onClick = { isPasswordVisibility = !isPasswordVisibility },
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+                            Icon(
+                                imageVector = if (isPasswordVisibility) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = "Toggle password"
+                            )
+                        }
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -130,17 +158,41 @@ fun LoginScreen() {
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+
+                    if (state.errorMessage != null) {
+                        Text(
+                            text = state.errorMessage,
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                     Button(
-                        onClick = {},
+                        onClick = {
+                            val buffer = passwordState.text
+
+                            val passwordChars = CharArray(buffer.length) { index -> buffer[index] }
+                            passwordState.clearText()
+
+                            viewModel.onLoginClicked(username, passwordChars, serverUrl, onSuccess = onLoginSuccess)
+                        },
+                        enabled = !state.isLoading,
                         shape = RoundedCornerShape(24.dp),
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp)
                     ) {
-                        Text(
-                            text = "Log In",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        if (state.isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text(
+                                text = "Log In",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
                     }
 
                     TextButton(
