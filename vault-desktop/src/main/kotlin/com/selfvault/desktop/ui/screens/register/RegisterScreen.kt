@@ -1,4 +1,4 @@
-package com.selfvault.desktop.ui.screens.login
+package com.selfvault.desktop.ui.screens.register
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,26 +20,35 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.unit.dp
 import com.selfvault.desktop.ui.theme.AppSpacing
 
 @Composable
-fun LoginScreen(
-    viewModel: LoginViewModel,
+fun RegisterScreen(
+    viewModel: RegisterViewModel,
     initialUsername: String = "",
     initialServerUrl: String = "http://localhost:8085",
-    onLoginSuccess: () -> Unit = {},
-    onNavigateToRegister: (username: String, serverUrl: String) -> Unit = {_, _ ->}
+    onLoginClicked: (String, String) -> Unit = {_, _ ->},
+    onRegisterSuccess: () -> Unit = {}
 ) {
     Box(
         Modifier.fillMaxSize(),
@@ -90,11 +99,12 @@ fun LoginScreen(
                     )
                     Spacer(modifier = Modifier.height(AppSpacing.titleSubtitleSpacing))
                     Text(
-                        text = "Enter your master credentials",
+                        text = "Register your account",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
                 Spacer(modifier = Modifier.height(AppSpacing.sectionSpacing))
 
                 Column(
@@ -110,6 +120,7 @@ fun LoginScreen(
                         shape = RoundedCornerShape(AppSpacing.fieldCornerRadius),
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
@@ -118,6 +129,7 @@ fun LoginScreen(
                         shape = RoundedCornerShape(AppSpacing.fieldCornerRadius),
                         modifier = Modifier.fillMaxWidth()
                     )
+
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -186,7 +198,7 @@ fun LoginScreen(
                             val passwordChars = CharArray(buffer.length) { index -> buffer[index] }
                             passwordState.clearText()
 
-                            viewModel.onLoginClicked(username, passwordChars, serverUrl, onSuccess = onLoginSuccess)
+                            viewModel.onRegisterClicked(username, passwordChars, serverUrl, onSuccess = onRegisterSuccess)
                         },
                         enabled = !state.isLoading,
                         shape = RoundedCornerShape(AppSpacing.buttonCornerRadius),
@@ -202,16 +214,17 @@ fun LoginScreen(
                             )
                         } else {
                             Text(
-                                text = "Log In",
+                                text = "Register",
                                 style = MaterialTheme.typography.titleMedium
                             )
                         }
                     }
+
                     TextButton(
-                        onClick = { onNavigateToRegister(username, serverUrl) },
+                        onClick = { onLoginClicked(username, serverUrl) },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Create new account")
+                        Text("Already have account?")
                     }
                 }
             }

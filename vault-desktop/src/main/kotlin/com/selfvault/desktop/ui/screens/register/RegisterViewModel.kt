@@ -1,10 +1,9 @@
-package com.selfvault.desktop.ui.screens.login
+package com.selfvault.desktop.ui.screens.register
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.selfvault.client.VaultApiClient
-import com.selfvault.client.service.AuthenticateService
 import com.selfvault.client.service.RegisterService
 import com.selfvault.crypto.KeyDerivationService
 import kotlinx.coroutines.CoroutineName
@@ -13,17 +12,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-class LoginViewModel(
+class RegisterViewModel(
     private val apiClient: VaultApiClient,
-    private val authenticateService: AuthenticateService
+    private val registerService: RegisterService,
 ) {
-    var state by mutableStateOf(LoginState())
+    var state by mutableStateOf(RegisterState())
         private set
 
     private val viewModelCoroutineScope = CoroutineScope(
         Dispatchers.IO + SupervisorJob() + CoroutineName("LoginRequestCoroutine")
     )
-    fun onLoginClicked(username: String, password: CharArray, serverUrl: String, onSuccess: () -> Unit = {}) {
+    fun onRegisterClicked(username: String, password: CharArray, serverUrl: String, onSuccess: () -> Unit = {}) {
         if (username.isBlank() || password.isEmpty() || serverUrl.isBlank()) {
             state = state.copy(
                 isLoading = false,
@@ -39,8 +38,7 @@ class LoginViewModel(
             try {
                 apiClient.serverUrl = serverUrl.trimEnd('/')
 
-                authenticateService.login(username, password)
-                KeyDerivationService.wipe(password)
+                registerService.register(username, password)
 
                 state = state.copy(isLoading = false, errorMessage = null)
                 onSuccess()
@@ -53,9 +51,5 @@ class LoginViewModel(
                 KeyDerivationService.wipe(password)
             }
         }
-    }
-
-    fun onRegisterClicked() {
-
     }
 }
