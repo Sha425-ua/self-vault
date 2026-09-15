@@ -54,7 +54,8 @@ public class VaultApiClient {
             switch (response.statusCode()) {
                 case 200, 201 -> {}
                 case 500 -> throw new ServerException("Internal server error");
-                case 400, 409 -> throw new ServerException("Bad request: " + response.body());
+                case 400 -> throw new ServerException("Bad request: " + response.body());
+                case 409 -> throw new IllegalArgumentException("User already exist with this username!");
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
         } catch (IOException | InterruptedException e) {
@@ -187,7 +188,7 @@ public class VaultApiClient {
         }
     }
 
-    public void login(String username, String authHash) {
+    public boolean login(String username, String authHash) {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(serverUrl + "/api/auth/login"))
                 .POST(HttpRequest.BodyPublishers.noBody())
@@ -198,7 +199,7 @@ public class VaultApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             switch (response.statusCode()) {
-                case 200, 201 -> {}
+                case 200, 201 -> { return true; }
                 case 401 -> throw new AuthException("Invalid password");
                 case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
                 case 500 -> throw new ServerException("Internal server error");
