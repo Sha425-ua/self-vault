@@ -21,7 +21,7 @@ import java.util.List;
 
 public class VaultApiClient {
     private final HttpClient httpClient;
-    private final String serverUrl;
+    private volatile String serverUrl;
     private final ObjectMapper objectMapper;
 
     public VaultApiClient(String serverUrl) {
@@ -30,6 +30,14 @@ public class VaultApiClient {
                 .connectTimeout(Duration.ofSeconds(5))
                 .build();
         this.serverUrl = serverUrl;
+    }
+
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
+    public String getServerUrl() {
+        return serverUrl;
     }
 
     public void register(RegisterRequestDto dto) {
@@ -46,7 +54,8 @@ public class VaultApiClient {
             switch (response.statusCode()) {
                 case 200, 201 -> {}
                 case 500 -> throw new ServerException("Internal server error");
-                case 400, 409 -> throw new ServerException("Bad request: " + response.body());
+                case 400 -> throw new ServerException("Bad request: " + response.body());
+                case 409 -> throw new IllegalArgumentException("User already exist with this username!");
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }
         } catch (IOException | InterruptedException e) {
@@ -171,6 +180,28 @@ public class VaultApiClient {
                 case 200 -> { return response.body(); }
                 case 401 -> throw new AuthException("Invalid password");
                 case 404 -> throw new SecretNotFoundException("Secret not found for user " + username + ".");
+                case 500 -> throw new ServerException("Internal server error");
+                default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
+            }
+        } catch (IOException | InterruptedException e) {
+            throw new ServerException("Network connection failed: " + e.getMessage());
+        }
+    }
+
+    public boolean login(String username, String authHash) {
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + "/api/auth/login"))
+                .POST(HttpRequest.BodyPublishers.noBody())
+                .headers("X-Username", username, "X-Auth-Hash", authHash)
+                .build();
+
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            switch (response.statusCode()) {
+                case 200, 201 -> { return true; }
+                case 401 -> throw new AuthException("Invalid password");
+                case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
                 case 500 -> throw new ServerException("Internal server error");
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
             }

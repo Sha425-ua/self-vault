@@ -14,20 +14,24 @@ public class RegisterService {
         this.apiClient = apiClient;
     }
 
-    public void register(String username, char[] masterPassword) throws Exception {
-        byte[] salt = KeyDerivationService.generateSalt();
-        byte[] masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
+    public void register(String username, char[] masterPassword) {
+        try {
+            byte[] salt = KeyDerivationService.generateSalt();
+            byte[] masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
 
-        String authHash = AuthHashService.generateAuthHash(masterKey);
+            String authHash = AuthHashService.generateAuthHash(masterKey);
 
-        KeyDerivationService.wipe(masterPassword);
+            KeyDerivationService.wipe(masterPassword);
 
-        RegisterRequestDto dto = new RegisterRequestDto(
-                username,
-                authHash,
-                Base64.getEncoder().encodeToString(salt)
-        );
+            RegisterRequestDto dto = new RegisterRequestDto(
+                    username,
+                    authHash,
+                    Base64.getEncoder().encodeToString(salt)
+            );
 
-        apiClient.register(dto);
+            apiClient.register(dto);
+        } finally {
+            KeyDerivationService.wipe(masterPassword);
+        }
     }
 }
