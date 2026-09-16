@@ -26,6 +26,7 @@ dependencies {
 
     // Jackson JSON parser:
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.18.2")
 
     // Coroutine
     // implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1")
