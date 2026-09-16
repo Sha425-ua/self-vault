@@ -1,6 +1,5 @@
 package com.selfvault.desktop
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.*
@@ -14,6 +13,7 @@ import com.selfvault.desktop.ui.screens.register.RegisterScreen
 import com.selfvault.desktop.ui.screens.register.RegisterViewModel
 import com.selfvault.desktop.ui.screens.register.success.RegisterSuccessScreen
 import com.selfvault.desktop.ui.theme.AppTypography
+import com.selfvault.desktop.ui.theme.getAppColorScheme
 
 enum class AppScreen {
     LOGIN,
@@ -28,10 +28,8 @@ fun App(appContainer: AppContainer) {
     var sharedUsername by remember { mutableStateOf("") }
     var sharedServerUrl by remember { mutableStateOf("http://localhost:8085") }
 
-    val isDarkTheme = isSystemInDarkTheme()
-
     MaterialTheme(
-        colorScheme = if (isDarkTheme) darkColorScheme() else darkColorScheme(),
+        colorScheme = getAppColorScheme() as ColorScheme,
         typography = AppTypography
     ) {
         Surface(
