@@ -29,9 +29,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.fasterxml.jackson.core.util.Separators
 import com.selfvault.desktop.ui.components.FloatingShapesBackground
 import com.selfvault.desktop.ui.theme.AppSpacing
 import java.awt.Desktop

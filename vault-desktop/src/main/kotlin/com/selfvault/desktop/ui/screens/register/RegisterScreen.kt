@@ -56,7 +56,7 @@ fun RegisterScreen(
     ) {
         var serverUrl by remember { mutableStateOf(initialServerUrl) }
         var username by remember { mutableStateOf(initialUsername) }
-        var passwordState = rememberTextFieldState()
+        val passwordState = rememberTextFieldState()
         var isPasswordVisibility by remember { mutableStateOf(false) }
 
         val state = viewModel.state

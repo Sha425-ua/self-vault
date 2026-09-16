@@ -5,7 +5,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.selfvault.client.VaultApiClient
 import com.selfvault.client.service.AuthenticateService
-import com.selfvault.client.service.RegisterService
 import com.selfvault.crypto.KeyDerivationService
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
@@ -53,9 +52,5 @@ class LoginViewModel(
                 KeyDerivationService.wipe(password)
             }
         }
-    }
-
-    fun onRegisterClicked() {
-
     }
 }

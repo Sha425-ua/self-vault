@@ -1,21 +1,19 @@
 package com.selfvault.desktop
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.selfvault.desktop.ui.screens.home.HomeScreen
 import com.selfvault.desktop.ui.screens.login.LoginScreen
 import com.selfvault.desktop.ui.screens.login.LoginViewModel
 import com.selfvault.desktop.ui.screens.register.RegisterScreen
 import com.selfvault.desktop.ui.screens.register.RegisterViewModel
 import com.selfvault.desktop.ui.screens.register.success.RegisterSuccessScreen
 import com.selfvault.desktop.ui.theme.AppTypography
-import org.jetbrains.skiko.SystemTheme
-import org.jetbrains.skiko.currentSystemTheme
+import com.selfvault.desktop.ui.theme.getAppColorScheme
 
 enum class AppScreen {
     LOGIN,
@@ -30,10 +28,8 @@ fun App(appContainer: AppContainer) {
     var sharedUsername by remember { mutableStateOf("") }
     var sharedServerUrl by remember { mutableStateOf("http://localhost:8085") }
 
-    val isDarkTheme = isSystemInDarkTheme()
-
     MaterialTheme(
-        colorScheme = if (isDarkTheme) darkColorScheme() else darkColorScheme(),
+        colorScheme = getAppColorScheme() as ColorScheme,
         typography = AppTypography
     ) {
         Surface(
@@ -87,15 +83,7 @@ fun App(appContainer: AppContainer) {
                     )
                 }
                 AppScreen.HOME -> {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = androidx.compose.ui.Alignment.Center
-                    ) {
-                        Text(
-                            text = "Добро пожаловать в Главное меню!",
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                    }
+                    HomeScreen()
                 }
             }
         }
