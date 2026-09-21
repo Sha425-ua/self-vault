@@ -23,6 +23,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(compose.material3)
     implementation(compose.materialIconsExtended)
+    implementation("androidx.graphics:graphics-shapes:1.0.1")
 
     // Jackson JSON parser:
     implementation("com.fasterxml.jackson.core:jackson-databind:2.18.2")

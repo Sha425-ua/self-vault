@@ -14,25 +14,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Paint
-import androidx.compose.ui.graphics.PaintingStyle
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.selfvault.desktop.ui.theme.AppSpacing
 import kotlinx.coroutines.launch
-import kotlin.Int
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.random.Random
 import kotlin.random.nextInt
+import com.selfvault.desktop.ui.theme.MaterialShapes
+import com.selfvault.desktop.ui.theme.drawMaterialShape
+
 
 class ParticleConfig(
     initialX: Float,
@@ -43,7 +36,6 @@ class ParticleConfig(
     initialShape: ShapeType,
     initialRotation: Float = Random.nextFloat() * 360f,
     initialVr: Float,
-    initialInnerRadius: Float? = null
 ) {
 
     var x: Float by mutableFloatStateOf(initialX)
@@ -54,7 +46,6 @@ class ParticleConfig(
     var radius: Float by mutableFloatStateOf(initialRadius)
     var shape: ShapeType by mutableStateOf(initialShape)
     var rotation: Float by mutableFloatStateOf(initialRotation)
-    var innerRadius: Float? by mutableStateOf(initialInnerRadius)
 
     fun update(width: Float, height: Float, dt: Float) {
         x += vx * dt
@@ -98,7 +89,6 @@ class ParticleConfig(
 
     private fun onWrap() {
         shape = ShapeType.entries.random()
-        innerRadius = if (shape == ShapeType.OCTAGON) radius * 0.82f else null
     }
 }
 
@@ -107,7 +97,13 @@ enum class ShapeType {
     SQUARE,
     OVAL,
     PENTAGON,
-    OCTAGON
+    VERY_SUNNY,
+    ARROW,
+    TRIANGLE,
+    CLOVER_4LEAF,
+    CLOVER_8LEAF,
+    GEM,
+    SOFT_BURST
 }
 
 data class ColorConfig(
@@ -137,24 +133,17 @@ fun FloatingShapesBackground(modifier: Modifier = Modifier) {
         val particleList = remember {
             List(10) {
                 val shape = ShapeType.entries.random()
-                val radius = Random.nextInt(30, 60).toFloat()
-
-                val innerRadius = if (shape == ShapeType.OCTAGON) {
-                    radius * Random.nextDouble(0.80, 0.86).toFloat()
-                } else {
-                    0f
-                }
+                val radius = Random.nextInt(20, 60).toFloat()
 
                 ParticleConfig(
                     initialX = Random.nextFloat() * widthPx,
                     initialY = Random.nextFloat() * heightPx,
                     initialRadius = radius,
                     initialShape = shape,
-                    initialVx = Random.nextInt(-35, 35).toFloat(),
-                    initialVy = Random.nextInt(-35, 35).toFloat(),
+                    initialVx = Random.nextInt(-25, 25).toFloat(),
+                    initialVy = Random.nextInt(-25, 25).toFloat(),
                     initialVr = Random.nextDouble(-25.0, 25.0).toFloat(),
                     initialRotation = Random.nextInt(-1, 1).toFloat(),
-                    initialInnerRadius = innerRadius,
                 )
             }
         }
@@ -181,55 +170,55 @@ fun SingleShape(
     color: Color
 ) {
 
-    fun createPolygonPath(center: Offset, radius: Float, sides: Int): Path {
-        val path = Path()
-        val angleStep = (2.0 * Math.PI / sides)
-
-        for (i in 0 until sides) {
-            val angle = i * angleStep - (Math.PI / 2)
-            val x = center.x + radius * cos(angle).toFloat()
-            val y = center.y + radius * sin(angle).toFloat()
-
-            if (i == 0) {
-                path.moveTo(x, y)
-            } else {
-                path.lineTo(x, y)
-            }
-        }
-        path.close()
-        return path
-    }
-
-    fun createStarPath(center: Offset, outerRadius: Float, innerRadius: Float, points: Int): Path {
-        val path = Path()
-        val totalSteps = points * 2
-        val angleStep = (2.0 * Math.PI / totalSteps)
-
-        for (i in 0 until totalSteps) {
-            val angle = i * angleStep - (Math.PI / 2)
-
-            val currentRadius = if (i % 2 == 0) outerRadius else innerRadius
-
-            val x = center.x + currentRadius * cos(angle).toFloat()
-            val y = center.y + currentRadius * sin(angle).toFloat()
-
-            if (i == 0) {
-                path.moveTo(x, y)
-            } else {
-                path.lineTo(x, y)
-            }
-        }
-        path.close()
-        return path
-    }
-
-    val paint = remember(color) {
-        Paint().apply {
-            this.color = color
-            this.style = PaintingStyle.Fill
-            this.pathEffect = PathEffect.cornerPathEffect(8f)
-        }
-    }
+//    fun createPolygonPath(center: Offset, radius: Float, sides: Int): Path {
+//        val path = Path()
+//        val angleStep = (2.0 * Math.PI / sides)
+//
+//        for (i in 0 until sides) {
+//            val angle = i * angleStep - (Math.PI / 2)
+//            val x = center.x + radius * cos(angle).toFloat()
+//            val y = center.y + radius * sin(angle).toFloat()
+//
+//            if (i == 0) {
+//                path.moveTo(x, y)
+//            } else {
+//                path.lineTo(x, y)
+//            }
+//        }
+//        path.close()
+//        return path
+//    }
+//
+//    fun createStarPath(center: Offset, outerRadius: Float, innerRadius: Float, points: Int): Path {
+//        val path = Path()
+//        val totalSteps = points * 2
+//        val angleStep = (2.0 * Math.PI / totalSteps)
+//
+//        for (i in 0 until totalSteps) {
+//            val angle = i * angleStep - (Math.PI / 2)
+//
+//            val currentRadius = if (i % 2 == 0) outerRadius else innerRadius
+//
+//            val x = center.x + currentRadius * cos(angle).toFloat()
+//            val y = center.y + currentRadius * sin(angle).toFloat()
+//
+//            if (i == 0) {
+//                path.moveTo(x, y)
+//            } else {
+//                path.lineTo(x, y)
+//            }
+//        }
+//        path.close()
+//        return path
+//    }
+//
+//    val paint = remember(color) {
+//        Paint().apply {
+//            this.color = color
+//            this.style = PaintingStyle.Fill
+//            this.pathEffect = PathEffect.cornerPathEffect(8f)
+//        }
+//    }
 
     val rotationAngle = remember { Animatable(0f) }
 
@@ -269,61 +258,17 @@ fun SingleShape(
 
         rotate(degrees = particle.rotation, pivot = center) {
             when (particle.shape) {
-                ShapeType.CIRCLE -> drawCircle(
-                    color = color,
-                    radius = particle.radius,
-                    center = center
-                )
-
-                ShapeType.SQUARE -> {
-                    drawRoundRect(color = color,
-                        topLeft = Offset(
-                            x = center.x - particle.radius,
-                            y = center.y - particle.radius
-                        ),
-                        size = Size(
-                            width = particle.radius * 2,
-                            height = particle.radius * 2,
-                        ),
-                        cornerRadius = CornerRadius(x = 12f, y = 12f)
-                    )
-                }
-                ShapeType.OVAL -> {
-                    val width = particle.radius * 1.3f
-                    val height = particle.radius * 2f
-                    drawOval(
-                        color = color,
-                        topLeft = Offset(
-                            x = center.x - width / 2f,
-                            y = center.y - height / 2f
-                        ),
-                        size = Size(
-                            width = width,
-                            height = height
-                        )
-                    )
-                }
-                ShapeType.PENTAGON -> {
-                    val polygonPath = createPolygonPath(
-                        center = center,
-                        radius = particle.radius,
-                        sides = 5
-                    )
-                    drawIntoCanvas { canvas ->
-                        canvas.drawPath(polygonPath, paint)
-                    }
-                }
-                ShapeType.OCTAGON -> {
-                    val polygonPath = createStarPath(
-                        center = center,
-                        innerRadius = particle.innerRadius ?: (particle.radius * 0.82f),
-                        outerRadius = particle.radius,
-                        points = 8
-                    )
-                    drawIntoCanvas { canvas ->
-                        canvas.drawPath(polygonPath, paint)
-                    }
-                }
+                ShapeType.CIRCLE -> drawMaterialShape(MaterialShapes.Circle, center, particle.radius, color)
+                ShapeType.SQUARE -> drawMaterialShape(MaterialShapes.Square, center, particle.radius, color)
+                ShapeType.GEM -> drawMaterialShape(MaterialShapes.Gem, center, particle.radius, color)
+                ShapeType.OVAL -> drawMaterialShape(MaterialShapes.Oval, center, particle.radius, color)
+                ShapeType.PENTAGON -> drawMaterialShape(MaterialShapes.Pentagon, center, particle.radius, color)
+                ShapeType.VERY_SUNNY -> drawMaterialShape(MaterialShapes.VerySunny, center, particle.radius, color)
+                ShapeType.TRIANGLE -> drawMaterialShape(MaterialShapes.Triangle, center, particle.radius, color)
+                ShapeType.ARROW -> drawMaterialShape(MaterialShapes.Arrow, center, particle.radius, color)
+                ShapeType.CLOVER_4LEAF -> drawMaterialShape(MaterialShapes.Clover4Leaf, center, particle.radius, color)
+                ShapeType.CLOVER_8LEAF -> drawMaterialShape(MaterialShapes.Clover8Leaf, center, particle.radius, color)
+                ShapeType.SOFT_BURST -> drawMaterialShape(MaterialShapes.SoftBurst, center, particle.radius, color)
             }
         }
     }
