@@ -40,6 +40,29 @@ public class AuthenticateService {
         }
     }
 
+    public byte[] loginAndDeriveKey(String username, char[] masterPassword) {
+        byte[] salt;
+        byte[] masterKey = null;
+
+        try {
+            salt = getUserSalt(username);
+            masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
+            KeyDerivationService.wipe(masterPassword);
+
+            String authHash = AuthHashService.generateAuthHash(masterKey);
+
+            apiClient.login(username, authHash);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            KeyDerivationService.wipe(masterPassword);
+        }
+
+        return masterKey;
+    }
+
+
+
     public static boolean verifyAuthHash(String expectedHash, String actualHash) {
         if (expectedHash == null || actualHash == null) {
             return false;
