@@ -23,8 +23,14 @@ class VaultSessionManager(
 
     var masterKey: ByteArray? = null
 
-    fun unlock(key: ByteArray) {
+    var activeUsername: String? = null
+
+    fun unlock(
+        key: ByteArray,
+        username: String,
+    ) {
         this.masterKey = key
+        this.activeUsername = username
         this.isUnlocked = true
         resetTimer()
     }
@@ -45,8 +51,9 @@ class VaultSessionManager(
         timerJob?.cancel()
         timerJob = null
 
-        masterKey?.let { KeyDerivationService.wipe(it) }
-        masterKey = null
+        this.masterKey?.let { KeyDerivationService.wipe(it) }
+        this.masterKey = null
+        this.activeUsername = null
 
         isUnlocked = false
     }
@@ -56,5 +63,12 @@ class VaultSessionManager(
         resetTimer()
 
         return key.copyOf()
+    }
+
+    fun getActiveUsername(): String {
+        val username = activeUsername ?: throw IllegalStateException("Vault is locked")
+        resetTimer()
+
+        return username
     }
 }
