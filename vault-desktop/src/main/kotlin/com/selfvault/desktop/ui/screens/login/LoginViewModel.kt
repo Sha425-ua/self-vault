@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import com.selfvault.client.VaultApiClient
 import com.selfvault.client.service.AuthenticateService
 import com.selfvault.crypto.KeyDerivationService
+import com.selfvault.desktop.config.VaultSessionManager
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +15,8 @@ import kotlinx.coroutines.launch
 
 class LoginViewModel(
     private val apiClient: VaultApiClient,
-    private val authenticateService: AuthenticateService
+    private val authenticateService: AuthenticateService,
+    private val sessionManager: VaultSessionManager
 ) {
     var state by mutableStateOf(LoginState())
         private set
@@ -38,10 +40,13 @@ class LoginViewModel(
             try {
                 apiClient.serverUrl = serverUrl.trimEnd('/')
 
-                authenticateService.login(username, password)
+                val masterKey: ByteArray = authenticateService.loginAndDeriveKey(username, password)
+
                 KeyDerivationService.wipe(password)
 
                 state = state.copy(isLoading = false, errorMessage = null)
+
+                sessionManager.unlock(masterKey)
                 onSuccess()
             } catch (e: Exception) {
                 state = state.copy(

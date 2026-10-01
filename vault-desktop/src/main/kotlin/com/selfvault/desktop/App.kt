@@ -47,7 +47,8 @@ fun App(appContainer: AppContainer) {
                     val viewModel = remember {
                         LoginViewModel(
                             apiClient = appContainer.apiClient,
-                            authenticateService = appContainer.authService
+                            authenticateService = appContainer.authService,
+                            sessionManager = appContainer.sessionManager
                         )
                     }
                     LoginScreen(
