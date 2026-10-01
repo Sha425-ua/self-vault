@@ -16,6 +16,7 @@ build/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea/
 
 ### Eclipse ###
 .apt_generated
@@ -40,4 +41,4 @@ bin/
 .vscode/
 
 ### Mac OS ###
-.DS_Store.idea/
+.DS_Store
