@@ -24,7 +24,7 @@ enum class AppScreen {
 
 @Composable
 fun App(appContainer: AppContainer) {
-    var currencyScreen by remember { mutableStateOf(AppScreen.LOGIN) }
+    var currencyScreen by remember { mutableStateOf(AppScreen.HOME) }
     var sharedUsername by remember { mutableStateOf("") }
     var sharedServerUrl by remember { mutableStateOf("http://localhost:8085") }
 
@@ -36,6 +36,12 @@ fun App(appContainer: AppContainer) {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background,
         ) {
+            LaunchedEffect(appContainer.sessionManager.isUnlocked) {
+                if (!appContainer.sessionManager.isUnlocked && currencyScreen == AppScreen.HOME) {
+                    currencyScreen = AppScreen.LOGIN
+                }
+            }
+
             when (currencyScreen) {
                 AppScreen.LOGIN -> {
                     val viewModel = remember {
@@ -83,6 +89,7 @@ fun App(appContainer: AppContainer) {
                     )
                 }
                 AppScreen.HOME -> {
+
                     HomeScreen()
                 }
             }
