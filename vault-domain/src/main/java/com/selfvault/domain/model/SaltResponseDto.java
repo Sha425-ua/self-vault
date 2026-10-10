@@ -1,6 +1,6 @@
 package com.selfvault.domain.model;
 
-public record SaltResponceDto(
+public record SaltResponseDto(
         String salt
 ) {
 }
