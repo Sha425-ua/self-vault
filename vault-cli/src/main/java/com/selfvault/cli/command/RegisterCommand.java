@@ -1,6 +1,7 @@
 package com.selfvault.cli.command;
 
 import com.selfvault.client.service.RegisterService;
+import com.selfvault.client.util.CredentialsValidator;
 import com.selfvault.crypto.KeyDerivationService;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -13,15 +14,12 @@ import java.util.Scanner;
 public class RegisterCommand implements Runnable {
     private final RegisterService registerService;
 
+    @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Account username")
+    private String username;
+
     public RegisterCommand(RegisterService registerService) {
         this.registerService = registerService;
     }
-
-    @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Имя пользователя для регистрации")
-    private String username;
-
-    // TODO: После получения первой копии пароля сразу получать из него хеш и затирать массив пароля,
-    //  затем сравнивать хеши, а не массивы паролей. Это позволит избежать хранения пароля в памяти в открытом виде.
 
     @Override
     public void run() {
@@ -45,18 +43,22 @@ public class RegisterCommand implements Runnable {
                 ? console.readPassword()
                 : scanner.nextLine().toCharArray();
 
-        if (Arrays.equals(firstPassword, secondPassword)) {
-            KeyDerivationService.wipe(firstPassword);
-
-            try {
-                registerService.register(username, secondPassword);
-                System.out.println("User " + username + " successfully registered!");
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            } finally {
-                KeyDerivationService.wipe(secondPassword);
-                KeyDerivationService.wipe(firstPassword);
+        boolean passwordsMatch = Arrays.equals(firstPassword, secondPassword);
+        try {
+            if (!passwordsMatch) {
+                System.err.println("Passwords do not match!");
+                return;
             }
+
+            CredentialsValidator.validate(username, firstPassword);
+            registerService.register(username, firstPassword);
+
+            System.out.println("User " + username + " successfully registered!");
+        } catch (Exception e) {
+            System.err.println("Registration failed: " + e.getMessage());
+        } finally {
+            KeyDerivationService.wipe(firstPassword);
+            KeyDerivationService.wipe(secondPassword);
         }
     }
 }

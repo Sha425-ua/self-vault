@@ -1,12 +1,11 @@
 package com.selfvault.cli;
 
 import com.selfvault.cli.command.*;
-import com.selfvault.client.service.AuthenticateService;
-import com.selfvault.client.service.RegisterService;
-import com.selfvault.client.service.SecretService;
+import com.selfvault.cli.usecase.DeleteSecretUseCase;
+import com.selfvault.cli.usecase.GetSecretUseCase;
+import com.selfvault.cli.usecase.ListUseCase;
+import com.selfvault.cli.usecase.SaveSecretUseCase;
 import picocli.CommandLine;
-
-import com.selfvault.client.*;
 
 @CommandLine.Command(
         name = "self-vault",
@@ -15,19 +14,16 @@ import com.selfvault.client.*;
         description = "Self-Vault secure storage of secrets and passwords."
 )
 public class VaultCLI implements Runnable {
-    public static void main(String[] args) {
-        VaultApiClient apiClient = new VaultApiClient("http://localhost:8085");
 
-        AuthenticateService authenticateService = new AuthenticateService(apiClient);
-        SecretService secretService = new SecretService(apiClient, authenticateService);
-        RegisterService registerService = new RegisterService(apiClient);
+    public static void main(String[] args) {
+        AppContainer container = new AppContainer();
 
         CommandLine commandLine = new CommandLine(new VaultCLI())
-                .addSubcommand("register", new RegisterCommand(registerService))
-                .addSubcommand("add", new AddSecretCommand(secretService))
-                .addSubcommand("delete", new DeleteSecretCommand(secretService))
-                .addSubcommand("list", new ListCommand(secretService))
-                .addSubcommand("get", new GetSecretCommand(secretService));
+                .addSubcommand("register", new RegisterCommand(container.registerService))
+                .addSubcommand("add", new SaveSecretCommand(container.saveSecretUseCase))
+                .addSubcommand("delete", new DeleteSecretCommand(container.deleteSecretUseCase))
+                .addSubcommand("list", new ListCommand(container.listUseCase))
+                .addSubcommand("get", new GetSecretCommand(container.getSecretUseCase));
 
         int exitCode = commandLine.execute(args);
         System.exit(exitCode);

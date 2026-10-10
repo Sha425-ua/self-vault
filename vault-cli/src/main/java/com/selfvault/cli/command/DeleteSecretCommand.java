@@ -1,5 +1,6 @@
 package com.selfvault.cli.command;
 
+import com.selfvault.cli.usecase.DeleteSecretUseCase;
 import com.selfvault.client.service.SecretService;
 import com.selfvault.crypto.KeyDerivationService;
 import picocli.CommandLine;
@@ -9,7 +10,7 @@ import java.util.Scanner;
 
 @CommandLine.Command(name = "delete", description = "Delete a secret from the vault")
 public class DeleteSecretCommand implements Runnable {
-    private final SecretService service;
+    private final DeleteSecretUseCase deleteSecretUseCase;
 
     @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Registered username")
     private String username;
@@ -17,8 +18,8 @@ public class DeleteSecretCommand implements Runnable {
     @CommandLine.Option(names = {"-t", "--title"}, required = true, description = "Title of the secret to delete")
     private String title;
 
-    public DeleteSecretCommand(SecretService service) {
-        this.service = service;
+    public DeleteSecretCommand(DeleteSecretUseCase deleteSecretUseCase) {
+        this.deleteSecretUseCase = deleteSecretUseCase;
     }
 
     public void run() {
@@ -31,7 +32,7 @@ public class DeleteSecretCommand implements Runnable {
                 : scanner.nextLine().toCharArray();
 
         try {
-            service.deleteSecret(username, title, password);
+            deleteSecretUseCase.execute(username, title, password);
             System.out.println("Secret with title " + title + " successfully deleted for user " + username + ".");
         } catch (Exception e) {
             System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());

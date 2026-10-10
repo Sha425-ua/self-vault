@@ -1,6 +1,6 @@
 package com.selfvault.cli.command;
 
-import com.selfvault.client.service.SecretService;
+import com.selfvault.cli.usecase.ListUseCase;
 import com.selfvault.crypto.KeyDerivationService;
 import picocli.CommandLine;
 
@@ -13,10 +13,10 @@ public class ListCommand implements Runnable {
     @CommandLine.Option(names = {"-u", "--username"}, required = true, description = "Registered username")
     private String username;
 
-    private final SecretService secretService;
+    private final ListUseCase listUseCase;
 
-    public ListCommand(SecretService secretService) {
-        this.secretService = secretService;
+    public ListCommand(ListUseCase listUseCase) {
+        this.listUseCase = listUseCase;
     }
 
     @Override
@@ -24,13 +24,13 @@ public class ListCommand implements Runnable {
         Scanner scanner = new Scanner(System.in);
         Console console = System.console();
 
-        System.out.print("Please enter your master password to delete the secret: ");
+        System.out.print("Please enter your master password: ");
         char[] masterPassword = (console != null)
                 ? console.readPassword()
                 : scanner.nextLine().toCharArray();
 
         try {
-            List<String> secrets = secretService.listSecrets(username, masterPassword);
+            List<String> secrets = listUseCase.execute(username, masterPassword);
 
             if (secrets.isEmpty()) {
                 System.out.println("No secrets found for user " + username + ".");
@@ -49,6 +49,5 @@ public class ListCommand implements Runnable {
         } finally {
             KeyDerivationService.wipe(masterPassword);
         }
-
     }
 }
