@@ -6,7 +6,7 @@ import com.selfvault.domain.exception.SecretNotFoundException;
 import com.selfvault.domain.exception.ServerException;
 import com.selfvault.domain.exception.UserNotFoundException;
 import com.selfvault.domain.model.RegisterRequestDto;
-import com.selfvault.domain.model.SaltResponceDto;
+import com.selfvault.domain.model.SaltResponseDto;
 import com.selfvault.domain.model.SecretRequestDto;
 
 import java.io.IOException;
@@ -63,7 +63,7 @@ public class VaultApiClient {
         }
     }
 
-    public SaltResponceDto getSalt(String username) {
+    public SaltResponseDto getSalt(String username) {
         try {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(serverUrl + "/api/auth/salt"))
@@ -74,7 +74,7 @@ public class VaultApiClient {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             switch (response.statusCode()) {
-                case 200 -> { return objectMapper.readValue(response.body(), SaltResponceDto.class); }
+                case 200 -> { return objectMapper.readValue(response.body(), SaltResponseDto.class); }
                 case 404 -> throw new UserNotFoundException("User '" + username + "' not found on server.");
                 case 500 -> throw new ServerException("Internal server error");
                 default -> throw new ServerException("Unexpected server response: " + response.statusCode() + " - " + response.body());
@@ -84,6 +84,7 @@ public class VaultApiClient {
         }
     }
 
+    // TODO: Support title and notes
     public void sendSecret(String username, String authHash, SecretRequestDto dto) {
         try {
             String jsonBody = objectMapper.writeValueAsString(dto);

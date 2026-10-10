@@ -1,9 +1,12 @@
 package com.selfvault.client.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.selfvault.client.VaultApiClient;
+import com.selfvault.client.util.CredentialsValidator;
 import com.selfvault.crypto.AesEncryptionService;
 import com.selfvault.crypto.AuthHashService;
 import com.selfvault.crypto.KeyDerivationService;
+import com.selfvault.domain.model.SecretDto;
 import com.selfvault.domain.model.SecretRequestDto;
 
 import java.util.Base64;
@@ -11,95 +14,107 @@ import java.util.List;
 
 public class SecretService {
     private final VaultApiClient apiClient;
-    private final AuthenticateService authenticateService;
+    private final ObjectMapper objectMapper;
 
-    public SecretService(VaultApiClient apiClient, AuthenticateService authenticateService) {
-        this.apiClient = apiClient;
-        this.authenticateService = authenticateService;
+    public SecretService(VaultApiClient apiClient) {
+        this(apiClient, new ObjectMapper());
     }
 
-    public void addNewSecret(String username, String title, char[] secret, char[] masterPassword) throws Exception {
-        byte[] salt;
-        byte[] masterKey = null;
+    public SecretService(VaultApiClient apiClient, ObjectMapper objectMapper) {
+        this.apiClient = apiClient;
+        this.objectMapper = objectMapper;
+    }
+
+    public void addNewSecret(
+            String username,
+            byte[] masterKey,
+            SecretDto dto
+    ) throws Exception {
+
+        CredentialsValidator.validate(username, masterKey);
+
+        if (dto.getSecret() == null || dto.getSecret().length == 0) {
+            throw new IllegalArgumentException("Secret must not be empty!");
+        }
+
+        byte[] secretData = null;
 
         try {
-            salt = authenticateService.getUserSalt(username);
-            masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
-            KeyDerivationService.wipe(masterPassword);
+            secretData = objectMapper.writeValueAsBytes(dto);
 
-            byte[] encryptedData = AesEncryptionService.encryptSecret(secret, masterKey);
-            KeyDerivationService.wipe(secret);
+            byte[] encryptedData = AesEncryptionService.encryptSecret(secretData, masterKey);
             String encryptedDataString = Base64.getEncoder().encodeToString(encryptedData);
 
-            String authHash = AuthHashService.generateAuthHash(masterKey);
-            KeyDerivationService.wipe(masterKey);
+            KeyDerivationService.wipe(secretData);
 
-            SecretRequestDto requestDto = new SecretRequestDto(title, encryptedDataString);
+            String authHash = AuthHashService.generateAuthHash(masterKey);
+
+            dto.destroy();
+            KeyDerivationService.wipe(masterKey);
+            masterKey = null;
+
+            SecretRequestDto requestDto = new SecretRequestDto(
+                    dto.getTitle(),
+                    encryptedDataString
+            );
             apiClient.sendSecret(username, authHash, requestDto);
         } finally {
-            KeyDerivationService.wipe(secret);
+            dto.destroy();
             KeyDerivationService.wipe(masterKey);
-            KeyDerivationService.wipe(masterPassword);
+            KeyDerivationService.wipe(secretData);
         }
     }
 
-    public void deleteSecret(String username, String title, char[] masterPassword) throws Exception {
-        byte[] salt;
-        byte[] masterKey = null;
-
+    public void deleteSecret(String username, String title, byte[] masterKey) {
         try {
-            salt = authenticateService.getUserSalt(username);
-            masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
-            KeyDerivationService.wipe(masterPassword);
-
             String authHash = AuthHashService.generateAuthHash(masterKey);
             KeyDerivationService.wipe(masterKey);
 
             apiClient.deleteSecret(username, authHash, title);
         } finally {
-            KeyDerivationService.wipe(masterPassword);
             KeyDerivationService.wipe(masterKey);
         }
     }
 
-    public List<String> listSecrets(String username, char[] masterPassword) throws Exception {
-        byte[] salt;
-        byte[] masterKey = null;
+    public List<String> listSecrets(String username, byte[] masterKey) {
+        CredentialsValidator.validate(username, masterKey);
 
         try {
-            salt = authenticateService.getUserSalt(username);
-            masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
-
             String authHash = AuthHashService.generateAuthHash(masterKey);
 
             KeyDerivationService.wipe(masterKey);
-            KeyDerivationService.wipe(masterPassword);
+            masterKey = null;
 
             return apiClient.listSecrets(username, authHash);
         } finally {
             KeyDerivationService.wipe(masterKey);
-            KeyDerivationService.wipe(masterPassword);
         }
     }
 
-    public char[] getDecryptedSecret(String username, String title, char[] masterPassword) throws Exception {
-        byte[] salt;
-        byte[] masterKey = null;
+    public SecretDto getDecryptedSecret(String username, String title, byte[] masterKey) {
+
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Title must not be empty!");
+        }
+
+        byte[] decryptedSecret = null;
+
 
         try {
-            salt = authenticateService.getUserSalt(username);
-            masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
-            KeyDerivationService.wipe(masterPassword);
-
             String authHash = AuthHashService.generateAuthHash(masterKey);
 
             String encryptedSecret = apiClient.getEncryptedSecret(username, title, authHash);
             byte[] encryptedSecretBytes = Base64.getDecoder().decode(encryptedSecret);
-            return AesEncryptionService.decryptSecrets(encryptedSecretBytes, masterKey);
 
+            decryptedSecret = AesEncryptionService.decryptSecret(encryptedSecretBytes, masterKey);
+
+            return objectMapper.readValue(decryptedSecret, SecretDto.class);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             KeyDerivationService.wipe(masterKey);
-            KeyDerivationService.wipe(masterPassword);
+            KeyDerivationService.wipe(decryptedSecret);
         }
     }
 }

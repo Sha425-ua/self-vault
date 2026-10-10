@@ -1,6 +1,7 @@
 package com.selfvault.client.service;
 
 import com.selfvault.client.VaultApiClient;
+import com.selfvault.client.util.CredentialsValidator;
 import com.selfvault.crypto.AuthHashService;
 import com.selfvault.crypto.KeyDerivationService;
 
@@ -61,8 +62,6 @@ public class AuthenticateService {
         return masterKey;
     }
 
-
-
     public static boolean verifyAuthHash(String expectedHash, String actualHash) {
         if (expectedHash == null || actualHash == null) {
             return false;
@@ -71,5 +70,18 @@ public class AuthenticateService {
         byte[] actualBytes = actualHash.getBytes(StandardCharsets.UTF_8);
 
         return MessageDigest.isEqual(expectedBytes, actualBytes);
+    }
+
+    public byte[] deriveMasterKey(String username, char[] password) {
+        CredentialsValidator.validate(username, password);
+
+        byte[] salt = null;
+
+        try {
+            salt = getUserSalt(username);
+            return KeyDerivationService.deriveKey(password, salt);
+        } finally {
+            KeyDerivationService.wipe(salt);
+        }
     }
 }
