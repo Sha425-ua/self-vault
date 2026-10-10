@@ -3,7 +3,7 @@ package com.selfvault.desktop
 import com.selfvault.client.VaultApiClient
 import com.selfvault.client.service.AuthenticateService
 import com.selfvault.client.service.RegisterService
-import com.selfvault.desktop.config.ConfigLoader
+import com.selfvault.client.config.ConfigLoader
 import com.selfvault.desktop.config.VaultSessionManager
 import kotlinx.coroutines.CoroutineScope
 
