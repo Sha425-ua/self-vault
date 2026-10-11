@@ -1,10 +1,12 @@
 package com.selfvault.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import javax.security.auth.Destroyable;
 import java.util.Arrays;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SecretDto implements Destroyable {
     private final String title, login, note;
     private final char[] secret;
