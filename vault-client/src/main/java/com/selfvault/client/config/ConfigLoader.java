@@ -9,25 +9,29 @@ import java.io.File;
 public class ConfigLoader {
 
     private final ObjectMapper objectMapper;
+    public final AppConfig appConfig;
+    private final File file;
 
     public ConfigLoader(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+        this.file = AppPaths.getConfigFilePath().toFile();
+        this.appConfig = load();
     }
-    private final File file = AppPaths.getConfigDirPath().toFile();
 
     public ConfigLoader() {
         this(new ObjectMapper()
                 .configure(DeserializationFeature
                         .FAIL_ON_UNKNOWN_PROPERTIES, true)
                 .enable(SerializationFeature
-                        .INDENT_OUTPUT));
+                        .INDENT_OUTPUT)
+        );
     }
-
-    public final AppConfig appConfig = load();
 
     public AppConfig load() {
         try {
-            file.getParentFile().mkdirs();
+            if (file.getParentFile() != null) {
+                file.getParentFile().mkdirs();
+            }
 
             if (file.exists()) {
                 return objectMapper.readValue(file, AppConfig.class);
