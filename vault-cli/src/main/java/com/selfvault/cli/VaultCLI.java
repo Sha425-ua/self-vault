@@ -1,10 +1,8 @@
 package com.selfvault.cli;
 
 import com.selfvault.cli.command.*;
-import com.selfvault.cli.usecase.DeleteSecretUseCase;
-import com.selfvault.cli.usecase.GetSecretUseCase;
-import com.selfvault.cli.usecase.ListUseCase;
-import com.selfvault.cli.usecase.SaveSecretUseCase;
+import com.selfvault.cli.config.SessionManager;
+import com.selfvault.client.config.ConfigLoader;
 import picocli.CommandLine;
 
 @CommandLine.Command(
@@ -16,7 +14,11 @@ import picocli.CommandLine;
 public class VaultCLI implements Runnable {
 
     public static void main(String[] args) {
-        AppContainer container = new AppContainer();
+
+        ConfigLoader configLoader = new ConfigLoader();
+        SessionManager sessionManager = new SessionManager(configLoader.appConfig);
+
+        AppContainer container = new AppContainer(sessionManager.getHostAddress());
 
         CommandLine commandLine = new CommandLine(new VaultCLI())
                 .addSubcommand("register", new RegisterCommand(container.registerService))
