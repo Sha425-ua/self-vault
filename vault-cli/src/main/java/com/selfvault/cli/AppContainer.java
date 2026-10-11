@@ -20,10 +20,6 @@ public class AppContainer {
     public final GetSecretUseCase getSecretUseCase;
     public final DeleteSecretUseCase deleteSecretUseCase;
 
-    public AppContainer() {
-        this("http://localhost:8085");
-    }
-
     public AppContainer(String serverUrl) {
         this.vaultApiClient = new VaultApiClient(serverUrl);
         this.authenticateService = new AuthenticateService(vaultApiClient);
