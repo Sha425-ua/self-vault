@@ -1,16 +1,20 @@
 package com.selfvault.client.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.selfvault.client.VaultApiClient;
 import com.selfvault.crypto.AesEncryptionService;
 import com.selfvault.crypto.KeyDerivationService;
+import com.selfvault.domain.model.SecretDto;
 import com.selfvault.domain.model.SecretRequestDto;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
@@ -21,28 +25,28 @@ import static org.mockito.Mockito.*;
 class SecretServiceTest {
 
     @Mock
-    private AuthenticateService authenticateService;
-
-    @InjectMocks
-    private SecretService secretService;
-
-    @Mock
     private VaultApiClient apiClient;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private SecretService secretService;
+
+    @BeforeEach
+    void setUp() {
+        secretService = new SecretService(apiClient, objectMapper);
+    }
 
     @Test
     void addNewSecret_ShouldEncrypt() throws Exception {
         char[] secret = "Secret".toCharArray();
-        char[] masterPassword = "Password123_1/>".toCharArray();
+        byte[] masterKey = new byte[32];
         String username = "alice";
         String title = "github";
-
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
+        SecretDto dto = SecretDto.builder(title, secret).build();
 
         ArgumentCaptor<SecretRequestDto> captor = ArgumentCaptor.forClass(SecretRequestDto.class);
 
-        try (MockedStatic<KeyDerivationService> mockedCrypto = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)){
-            secretService.addNewSecret(username, title, secret, masterPassword);
+        try (MockedStatic<KeyDerivationService> mockedCrypto = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)) {
+            secretService.addNewSecret(username, masterKey, dto);
 
             mockedCrypto.verify(() -> KeyDerivationService.wipe(any(byte[].class)), atLeast(2));
         }
@@ -56,133 +60,115 @@ class SecretServiceTest {
 
     @Test
     void addNewSecret_ShouldWipeMemory() throws Exception {
-        char[] masterPassword = "Password123_1/>".toCharArray();
+        byte[] masterKey = new byte[32];
         String username = "alice";
         String title = "github";
         char[] secret = "Secret12321_".toCharArray();
-        byte[] testMasterKey = new byte[32];
+        SecretDto dto = SecretDto.builder(title, secret).build();
 
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
+        try (MockedStatic<KeyDerivationService> mockedStatic = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)) {
+            secretService.addNewSecret(username, masterKey, dto);
 
-        try (MockedStatic<KeyDerivationService> mockedStatic = mockStatic(KeyDerivationService.class)) {
-            mockedStatic.when(() -> KeyDerivationService.deriveKey(any(), any()))
-                    .thenReturn(testMasterKey);
-
-            secretService.addNewSecret(username, title, secret, masterPassword);
-
-            mockedStatic.verify(() -> KeyDerivationService.wipe(testMasterKey), times(2));
-            mockedStatic.verify(() -> KeyDerivationService.wipe(masterPassword), times(2));
-            mockedStatic.verify(() -> KeyDerivationService.wipe(secret), atLeast(2));
+            mockedStatic.verify(() -> KeyDerivationService.wipe(masterKey), atLeastOnce());
+            assertWiped(masterKey);
         }
     }
 
     @Test
-    void deleteSecret_ShouldDelete() throws Exception{
-        char[] masterPassword = "Password123_1/>".toCharArray();
+    void deleteSecret_ShouldDelete() {
+        byte[] masterKey = new byte[32];
         String username = "alice";
         String title = "github";
 
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
+        try (MockedStatic<KeyDerivationService> mockedCrypto = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)) {
+            secretService.deleteSecret(username, title, masterKey);
 
-        try (MockedStatic<KeyDerivationService> mockedCrypto = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)){
-            secretService.deleteSecret(username, title, masterPassword);
-
-            mockedCrypto.verify(() -> KeyDerivationService.wipe(any(byte[].class)), atLeast(2));
+            mockedCrypto.verify(() -> KeyDerivationService.wipe(masterKey), atLeastOnce());
         }
 
         verify(apiClient, times(1)).deleteSecret(eq(username), anyString(), eq(title));
-
-        assertWiped(masterPassword);
+        assertWiped(masterKey);
     }
 
     @Test
-    void deleteSecret_ShouldWipeMemory() throws Exception {
-        char[] masterPassword = "Password123_1/>".toCharArray();
+    void deleteSecret_ShouldWipeMemory() {
+        byte[] masterKey = new byte[32];
+        masterKey[0] = 42;
         String username = "alice";
         String title = "github";
-        byte[] testMasterKey = new byte[32];
 
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
+        try (MockedStatic<KeyDerivationService> mockedStatic = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)) {
+            secretService.deleteSecret(username, title, masterKey);
 
-        try (MockedStatic<KeyDerivationService> mockedStatic = mockStatic(KeyDerivationService.class)) {
-            mockedStatic.when(() -> KeyDerivationService.deriveKey(any(), any()))
-                    .thenReturn(testMasterKey);
-
-            secretService.deleteSecret(username, title, masterPassword);
-
-            mockedStatic.verify(() -> KeyDerivationService.wipe(testMasterKey), times(2));
-            mockedStatic.verify(() -> KeyDerivationService.wipe(masterPassword), times(2));
+            mockedStatic.verify(() -> KeyDerivationService.wipe(masterKey), atLeastOnce());
         }
+        assertWiped(masterKey);
     }
 
     @Test
     @DisplayName("Should send request to Vault API")
-    void listSecrets_ShouldSendRequestToVaultApiClient() throws Exception {
-        char[] masterPassword = "Password123_1/>".toCharArray();
+    void listSecrets_ShouldSendRequestToVaultApiClient() {
+        byte[] masterKey = new byte[32];
         String username = "alice";
         List<String> expectedList = List.of("github", "google", "card");
 
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
         when(apiClient.listSecrets(eq(username), anyString())).thenReturn(expectedList);
 
-        List<String> listTitle = secretService.listSecrets(username, masterPassword);
+        List<String> listTitle = secretService.listSecrets(username, masterKey);
 
         verify(apiClient, times(1)).listSecrets(eq(username), anyString());
         assertEquals(expectedList, listTitle);
-        assertWiped(masterPassword);
+        assertWiped(masterKey);
     }
 
     @Test
-    void listSecrets_ShouldWipeMemory() throws Exception {
-        char[] masterPassword = "Password123_1/>".toCharArray();
+    void listSecrets_ShouldWipeMemory() {
+        byte[] masterKey = new byte[32];
+        masterKey[0] = 7;
         String username = "alice";
-        byte[] testMasterKey = "Password123_1/>".getBytes(StandardCharsets.UTF_8);
 
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
+        when(apiClient.listSecrets(eq(username), anyString())).thenReturn(List.of());
 
-        try (MockedStatic<KeyDerivationService> mockedStatic = mockStatic(KeyDerivationService.class)) {
-            mockedStatic.when(() -> KeyDerivationService.deriveKey(any(), any()))
-                    .thenReturn(testMasterKey);
+        try (MockedStatic<KeyDerivationService> mockedStatic = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)) {
+            secretService.listSecrets(username, masterKey);
 
-            secretService.listSecrets(username, masterPassword);
-
-            mockedStatic.verify(() -> KeyDerivationService.wipe(testMasterKey), times(2));
-            mockedStatic.verify(() -> KeyDerivationService.wipe(masterPassword), times(2));
+            mockedStatic.verify(() -> KeyDerivationService.wipe(masterKey), atLeastOnce());
         }
+        assertWiped(masterKey);
     }
 
     @Test
     void getDecryptedSecret_ShouldDecryptSecretAndWipeMemory() throws Exception {
-        char[] masterPassword = "Password123_1/>".toCharArray();
+        byte[] masterKey = new byte[32];
+        masterKey[0] = 9;
+        byte[] masterKeyCopy = masterKey.clone();
+
         String username = "alice";
         String title = "github";
-        byte[] testMasterKey = new byte[32];
         char[] secret = "Secret12321_".toCharArray();
+        SecretDto originalDto = SecretDto.builder(title, secret).build();
 
-        byte[] encryptedSecretBytes = AesEncryptionService.encryptSecret(secret.clone(), testMasterKey);
-
+        byte[] serializedDto = objectMapper.writeValueAsBytes(originalDto);
+        byte[] encryptedSecretBytes = AesEncryptionService.encryptSecret(serializedDto, masterKeyCopy);
         String encryptedSecret = Base64.getEncoder().encodeToString(encryptedSecretBytes);
 
-        when(authenticateService.getUserSalt(username)).thenReturn(new byte[16]);
         when(apiClient.getEncryptedSecret(eq(username), eq(title), anyString())).thenReturn(encryptedSecret);
 
-        char[] decryptedSecret;
+        SecretDto decryptedDto;
+        try (MockedStatic<KeyDerivationService> mockStatic = mockStatic(KeyDerivationService.class, CALLS_REAL_METHODS)) {
+            decryptedDto = secretService.getDecryptedSecret(username, title, masterKey);
 
-        try (MockedStatic<KeyDerivationService> mockStatic = mockStatic(KeyDerivationService.class)) {
-            mockStatic.when(() -> KeyDerivationService.deriveKey(eq(masterPassword), any(byte[].class)))
-                    .thenReturn(testMasterKey);
-
-            decryptedSecret = secretService.getDecryptedSecret(username, title, masterPassword);
-
-            mockStatic.verify(() -> KeyDerivationService.wipe(testMasterKey), times(1));
-            mockStatic.verify(() -> KeyDerivationService.wipe(masterPassword), times(2));
+            mockStatic.verify(() -> KeyDerivationService.wipe(masterKey), atLeastOnce());
         }
 
-        assertArrayEquals(secret, decryptedSecret);
+        assertNotNull(decryptedDto);
+        assertEquals(title, decryptedDto.getTitle());
+        assertArrayEquals(secret, decryptedDto.getSecret());
+        assertWiped(masterKey);
     }
 
-    private void assertWiped(char[] array) {
-        char[] emptyArray = new char[array.length];
+    private void assertWiped(byte[] array) {
+        byte[] emptyArray = new byte[array.length];
         assertArrayEquals(emptyArray, array);
     }
 }
