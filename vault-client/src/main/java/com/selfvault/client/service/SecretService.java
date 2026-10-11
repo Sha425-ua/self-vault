@@ -98,7 +98,7 @@ public class SecretService {
         }
 
         byte[] decryptedSecret = null;
-
+        byte[] keyForDecryption = masterKey.clone();
 
         try {
             String authHash = AuthHashService.generateAuthHash(masterKey);
@@ -106,13 +106,14 @@ public class SecretService {
             String encryptedSecret = apiClient.getEncryptedSecret(username, title, authHash);
             byte[] encryptedSecretBytes = Base64.getDecoder().decode(encryptedSecret);
 
-            decryptedSecret = AesEncryptionService.decryptSecret(encryptedSecretBytes, masterKey);
+            decryptedSecret = AesEncryptionService.decryptSecret(encryptedSecretBytes, keyForDecryption);
 
             return objectMapper.readValue(decryptedSecret, SecretDto.class);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
+            KeyDerivationService.wipe(keyForDecryption);
             KeyDerivationService.wipe(masterKey);
             KeyDerivationService.wipe(decryptedSecret);
         }
