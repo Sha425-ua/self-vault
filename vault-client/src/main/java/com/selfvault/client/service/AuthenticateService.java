@@ -43,14 +43,14 @@ public class AuthenticateService {
 
     public byte[] loginAndDeriveKey(String username, char[] masterPassword) {
         byte[] salt;
-        byte[] masterKey = null;
+        byte[] masterKey;
 
         try {
             salt = getUserSalt(username);
             masterKey = KeyDerivationService.deriveKey(masterPassword, salt);
             KeyDerivationService.wipe(masterPassword);
 
-            String authHash = AuthHashService.generateAuthHash(masterKey);
+            String authHash = AuthHashService.generateAuthHash(masterKey.clone());
 
             apiClient.login(username, authHash);
         } catch (Exception e) {
