@@ -30,13 +30,15 @@ public class SecretController {
 
         authService.authUser(username, authHash);
 
+        log.info("User {} has been verified", username);
+
         secretService.saveSecret(username, dto);
 
         log.info("New secret with title {} for user {} saved successfully",
                 dto.title(), username);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Secret from " + username + " saved successfully!");
+                .body("Secret saved successfully!");
     }
 
     @DeleteMapping("/delete")
