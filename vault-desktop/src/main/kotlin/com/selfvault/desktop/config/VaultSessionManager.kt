@@ -3,6 +3,7 @@ package com.selfvault.desktop.config
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.selfvault.client.config.ConfigLoader
 import com.selfvault.crypto.KeyDerivationService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -38,7 +39,7 @@ class VaultSessionManager(
     fun resetTimer() {
         timerJob?.cancel()
 
-        val minutes = configLoader.config.appTimerTimeoutDuration
+        val minutes = configLoader.appConfig.appTimerTimeoutDuration
         if (minutes > 0) {
             timerJob = scope.launch {
                 delay(minutes.minutes)
@@ -65,7 +66,7 @@ class VaultSessionManager(
         return key.copyOf()
     }
 
-    fun getActiveUsername(): String {
+    fun getUsername(): String {
         val username = activeUsername ?: throw IllegalStateException("Vault is locked")
         resetTimer()
 
