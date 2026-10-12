@@ -3,6 +3,8 @@ package com.selfvault.desktop
 import androidx.compose.runtime.*
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -14,9 +16,15 @@ fun main() {
     System.setProperty("skiko.linux.autodetect", "true")
     System.setProperty("sun.java2d.opengl", "true")
 
-    val applicationScope = CoroutineScope(Dispatchers.Default + SupervisorJob() + CoroutineName("Application"))
+    val isDebug = System.getProperty("vault.debug")?.toBoolean() ?: false
 
-    val appContainer = AppContainer(applicationScope)
+    val applicationScope = CoroutineScope(Dispatchers.Default + SupervisorJob() + CoroutineName("Application"))
+    val objectMapper = ObjectMapper().registerKotlinModule()
+
+    val appContainer = AppContainer(
+        applicationScope,
+        objectMapper
+    )
 
     application {
         Window(
@@ -30,8 +38,10 @@ fun main() {
                     }
                 })
             }
-            App(appContainer = appContainer)
-
+            App(
+                appContainer = appContainer,
+                debug = isDebug
+            )
         }
     }
 }

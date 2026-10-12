@@ -1,14 +1,17 @@
 package com.selfvault.desktop
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.selfvault.client.VaultApiClient
 import com.selfvault.client.service.AuthenticateService
 import com.selfvault.client.service.RegisterService
 import com.selfvault.client.config.ConfigLoader
 import com.selfvault.desktop.config.VaultSessionManager
 import kotlinx.coroutines.CoroutineScope
+import com.selfvault.client.service.SecretService
 
 class AppContainer(
-    applicationScope: CoroutineScope
+    applicationScope: CoroutineScope,
+    objectMapper: ObjectMapper,
 ) {
     val apiClient = VaultApiClient("http://localhost:8085")
     val authService = AuthenticateService(apiClient)
@@ -19,5 +22,9 @@ class AppContainer(
     val sessionManager = VaultSessionManager(
         configLoader = configLoader,
         scope = applicationScope
+    )
+    val secretService = SecretService(
+        apiClient,
+        objectMapper
     )
 }
