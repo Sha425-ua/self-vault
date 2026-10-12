@@ -46,7 +46,7 @@ class LoginViewModel(
 
                 state = state.copy(isLoading = false, errorMessage = null)
 
-                sessionManager.unlock(masterKey)
+                sessionManager.unlock(masterKey, username)
                 onSuccess()
             } catch (e: Exception) {
                 state = state.copy(

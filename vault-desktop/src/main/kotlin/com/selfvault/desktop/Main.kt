@@ -27,7 +27,6 @@ fun main() {
                 window.addComponentListener(object : ComponentAdapter() {
                     override fun componentResized(e: ComponentEvent?) {
                         window.revalidate()
-                        window.repaint()
                     }
                 })
             }
