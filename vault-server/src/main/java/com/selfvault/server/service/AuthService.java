@@ -13,7 +13,9 @@ public class AuthService {
     public void authUser(String username, String authHash) {
         boolean isAuthenticated = repository.existsByUsernameAndAuthHash(username, authHash);
         if (!isAuthenticated) {
-            throw new AuthException("User or password wrong");
+            String errorMessage = String.format("User or password wrong for user %s with authHash %s",
+                    username, authHash);
+            throw new AuthException(errorMessage);
         }
     }
 }

@@ -64,8 +64,7 @@ public class SecretController {
             @RequestHeader("X-Auth-Hash") String authHash,
             @RequestHeader("X-Username") String username) {
 
-        log.info("Received new request to get list of secrets for user {}",
-                username);
+        log.info("Received new request to get list of secrets for user {}", username);
 
         authService.authUser(username, authHash);
 
