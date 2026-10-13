@@ -50,6 +50,7 @@ class AddNewSecretViewModel(
                     .build()
 
                 secretService.addNewSecret(activeSelfVaultUsername, masterKey, dto)
+                state = state.copy(isLoading = false)
 
                 onSuccess()
             } catch (ex: Exception) {

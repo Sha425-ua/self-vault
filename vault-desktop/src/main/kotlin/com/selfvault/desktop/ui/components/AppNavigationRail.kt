@@ -50,7 +50,7 @@ enum class NavigationSection(
     val icon: ImageVector,
 ) {
     ADD_NEW_SECRET(label = "Create new secret", icon = Icons.Default.Edit),
-    PASSWORD(label = "All item", icon = Icons.Default.Home),
+    SECRET_LIST(label = "All item", icon = Icons.Default.Home),
     SETTINGS(label = "Settings", icon = Icons.Default.Settings),
 }
 
@@ -75,7 +75,7 @@ fun AppNavigationRail(
         modifier = modifier
             .width(sidebarWidth)
             .fillMaxHeight(),
-        color = MaterialTheme.colorScheme.surface
+        color = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.85f)
     ) {
         Column(
             modifier = Modifier

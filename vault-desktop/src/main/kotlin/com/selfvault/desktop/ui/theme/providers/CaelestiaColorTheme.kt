@@ -35,7 +35,7 @@ fun createColorSchemeFromCaelestia(scheme: CaelestiaScheme): ColorScheme {
 
     val base = if (isDark) darkColorScheme() else lightColorScheme()
     return base.copy(
-        primary = c["primary"]?.let { hexToColor(it) } ?: base.onPrimary,
+        primary = c["primary"]?.let { hexToColor(it) } ?: base.primary,
         onPrimary = c["onPrimary"]?.let { hexToColor(it) } ?: base.onPrimary,
         primaryContainer = c["primaryContainer"]?.let { hexToColor(it) } ?: base.primaryContainer,
         onPrimaryContainer = c["onPrimaryContainer"]?.let { hexToColor(it) } ?: base.onPrimaryContainer,
@@ -51,6 +51,11 @@ fun createColorSchemeFromCaelestia(scheme: CaelestiaScheme): ColorScheme {
         onSurface = c["onSurface"]?.let { hexToColor(it) } ?: base.onSurface,
         surfaceVariant = c["surfaceVariant"]?.let { hexToColor(it) } ?: base.surfaceVariant,
         onSurfaceVariant = c["onSurfaceVariant"]?.let { hexToColor(it) } ?: base.onSurfaceVariant,
+        surfaceContainer = c["surfaceContainer"]?.let { hexToColor(it) } ?: base.surfaceContainer,
+        surfaceContainerLow = c["surfaceContainerLow"]?.let { hexToColor(it) } ?: base.surfaceContainerLow,
+        surfaceContainerLowest = c["surfaceContainerLowest"]?.let { hexToColor(it) } ?: base.surfaceContainerLowest,
+        surfaceContainerHigh = c["surfaceContainerHigh"]?.let { hexToColor(it) } ?: base.surfaceContainerHigh,
+        surfaceContainerHighest = c["surfaceContainerHighest"]?.let { hexToColor(it) } ?: base.surfaceContainerHighest,
         outline = c["outline"]?.let { hexToColor(it) } ?: base.outline,
         outlineVariant = c["outlineVariant"]?.let { hexToColor(it) } ?: base.outlineVariant,
         error = c["error"]?.let { hexToColor(it) } ?: base.error

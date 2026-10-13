@@ -107,7 +107,8 @@ fun App(appContainer: AppContainer, debug: Boolean) {
                         )
                     }
                     HomeScreen(
-                        viewModel = viewModel
+                        viewModel = viewModel,
+                        appContainer = appContainer
                     )
                 }
             }

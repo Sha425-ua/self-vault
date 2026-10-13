@@ -1,5 +1,7 @@
 package com.selfvault.desktop.ui.screens.home
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -16,22 +18,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.selfvault.desktop.ui.components.AppNavigationRail
 import com.selfvault.desktop.ui.components.NavigationSection
-import com.selfvault.desktop.ui.theme.AppSpacing
 import androidx.compose.runtime.setValue
+import com.selfvault.desktop.AppContainer
 import com.selfvault.desktop.ui.screens.home.addsecret.AddNewSecretScreen
 import com.selfvault.desktop.ui.screens.home.addsecret.AddNewSecretViewModel
+import com.selfvault.desktop.ui.screens.home.secret.SecretListScreen
+import com.selfvault.desktop.ui.screens.home.secret.SecretListViewModel
 import com.selfvault.desktop.ui.screens.home.settings.SettingsScreen
 import java.util.logging.Logger
 
 
 private val logger = Logger.getLogger("HomeScreen")
 @Composable
-fun HomeScreen(viewModel: AddNewSecretViewModel) {
+fun HomeScreen(
+    viewModel: AddNewSecretViewModel,
+    appContainer: AppContainer
+) {
     var currentSection by remember { mutableStateOf(NavigationSection.SETTINGS) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface.copy(alpha = 0.70f)
+        color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(modifier = Modifier.fillMaxSize()) {
             AppNavigationRail(
@@ -40,32 +47,42 @@ fun HomeScreen(viewModel: AddNewSecretViewModel) {
                     currentSection = newSection
                 }
             )
-
             Card(
                 modifier = Modifier
-                    .weight(1f)
                     .fillMaxSize()
-                    .padding(start = 0.dp, top = 16.dp, end = 16.dp, bottom = 16.dp),
+                    .padding(start = 0.dp, top = 12.dp, end = 12.dp, bottom = 12.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.70f)
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
-                shape = RoundedCornerShape(AppSpacing.cardCornerRadius)
+                shape = RoundedCornerShape(20.dp)
             ) {
-                when (currentSection) {
-                    NavigationSection.ADD_NEW_SECRET -> {
-                        AddNewSecretScreen(
-                            viewModel = viewModel,
-                            onClick = { currentSection = NavigationSection.PASSWORD }
-                        )
-                        logger.info("Navigation section changed to: $currentSection")
-                    }
+                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                    val startPadding = maxWidth * 0.20f
+                    val endPadding = maxWidth * 0.15f
 
-                    NavigationSection.PASSWORD -> {
+                    Box(modifier = Modifier.padding(start = startPadding, end = endPadding)) {
+                        when (currentSection) {
+                            NavigationSection.ADD_NEW_SECRET -> {
+                                AddNewSecretScreen(
+                                    viewModel = viewModel,
+                                    onClick = { currentSection = NavigationSection.SECRET_LIST }
+                                )
+                                logger.info("Navigation section changed to: $currentSection")
+                            }
 
-                    }
+                            NavigationSection.SECRET_LIST -> {
+                                SecretListScreen(
+                                    viewModel = SecretListViewModel(
+                                        secretService = appContainer.secretService,
+                                        sessionManager = appContainer.sessionManager
+                                    )
+                                )
+                            }
 
-                    NavigationSection.SETTINGS -> {
-                        SettingsScreen()
+                            NavigationSection.SETTINGS -> {
+                                SettingsScreen()
+                            }
+                        }
                     }
                 }
             }

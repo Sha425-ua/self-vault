@@ -29,7 +29,7 @@ fun main() {
     application {
         Window(
             onCloseRequest = ::exitApplication,
-            title = "Self-Vault"
+            title = "Self-Vault",
         ) {
             LaunchedEffect(window) {
                 window.addComponentListener(object : ComponentAdapter() {
