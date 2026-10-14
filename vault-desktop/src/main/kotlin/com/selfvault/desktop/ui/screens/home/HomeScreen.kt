@@ -71,12 +71,13 @@ fun HomeScreen(
                             }
 
                             NavigationSection.SECRET_LIST -> {
-                                SecretListScreen(
-                                    viewModel = SecretListViewModel(
+                                val viewModel = remember {
+                                    SecretListViewModel(
                                         secretService = appContainer.secretService,
                                         sessionManager = appContainer.sessionManager
                                     )
-                                )
+                                }
+                                SecretListScreen(viewModel = viewModel)
                             }
 
                             NavigationSection.SETTINGS -> {

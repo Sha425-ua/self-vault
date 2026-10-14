@@ -4,10 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.selfvault.client.service.SecretService
-import com.selfvault.crypto.KeyDerivationService
 import com.selfvault.desktop.config.VaultSessionManager
-import com.selfvault.desktop.ui.screens.login.LoginState
-import jdk.internal.org.jline.utils.Colors.s
 
 class SecretListViewModel(
     private val secretService: SecretService,
