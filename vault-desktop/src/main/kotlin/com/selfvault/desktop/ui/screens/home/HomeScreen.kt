@@ -60,7 +60,7 @@ fun HomeScreen(
                     val startPadding = maxWidth * 0.20f
                     val endPadding = maxWidth * 0.15f
 
-                    Box(modifier = Modifier.padding(start = startPadding, end = endPadding)) {
+                    Box(modifier = Modifier.padding(start = startPadding, end = endPadding, top = 16.dp, bottom = 16.dp)) {
                         when (currentSection) {
                             NavigationSection.ADD_NEW_SECRET -> {
                                 AddNewSecretScreen(
@@ -77,7 +77,9 @@ fun HomeScreen(
                                         sessionManager = appContainer.sessionManager
                                     )
                                 }
-                                SecretListScreen(viewModel = viewModel)
+                                SecretListScreen(
+                                    viewModel = viewModel
+                                )
                             }
 
                             NavigationSection.SETTINGS -> {

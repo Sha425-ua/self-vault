@@ -213,7 +213,7 @@ fun NavigationItem(
     Surface(
         selected = isSelected,
         onClick = onClick,
-        shape = RoundedCornerShape(AppSpacing.cardCornerRadius),
+        shape = RoundedCornerShape(AppSpacing.DialogCard.cornerRadius),
         color = if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
         contentColor = if (isSelected) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier

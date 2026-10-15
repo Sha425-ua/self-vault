@@ -54,14 +54,14 @@ fun LoginScreen(
 
         Card(
             modifier = Modifier
-                .width(AppSpacing.cardWidth)
-                .height(AppSpacing.cardHeight)
+                .width(AppSpacing.DialogCard.width)
+                .height(AppSpacing.DialogCard.height)
                 .shadow(
-                    elevation = AppSpacing.cardElevation,
-                    shape = RoundedCornerShape(AppSpacing.cardCornerRadius),
+                    elevation = AppSpacing.DialogCard.elevation,
+                    shape = RoundedCornerShape(AppSpacing.DialogCard.cornerRadius),
                     clip = false
                 ),
-            shape = RoundedCornerShape(AppSpacing.cardCornerRadius),
+            shape = RoundedCornerShape(AppSpacing.DialogCard.cornerRadius),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
@@ -71,7 +71,7 @@ fun LoginScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(AppSpacing.cardPadding)
+                    .padding(AppSpacing.DialogCard.padding)
             ) {
                 Icon(
                     imageVector = Icons.Default.Lock,

@@ -251,7 +251,7 @@ fun SingleShape(
     Canvas(modifier = Modifier
         .fillMaxSize()
         .padding(12.dp)
-        .clip(RoundedCornerShape(AppSpacing.cardCornerRadius - 12.dp))
+        .clip(RoundedCornerShape(AppSpacing.DialogCard.cornerRadius - 12.dp))
     ) {
 
         val center = Offset(particle.x, particle.y)

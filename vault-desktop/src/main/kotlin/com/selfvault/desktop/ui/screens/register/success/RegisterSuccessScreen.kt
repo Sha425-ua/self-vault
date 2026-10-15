@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.VerifiedUser
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -50,11 +49,11 @@ fun RegisterSuccessScreen(
                 .width(380.dp)
                 .height(420.dp)
                 .shadow(
-                    elevation = AppSpacing.cardElevation,
-                    shape = RoundedCornerShape(AppSpacing.cardCornerRadius),
+                    elevation = AppSpacing.DialogCard.elevation,
+                    shape = RoundedCornerShape(AppSpacing.DialogCard.cornerRadius),
                     clip = false
                 ),
-            shape = RoundedCornerShape(AppSpacing.cardCornerRadius),
+            shape = RoundedCornerShape(AppSpacing.DialogCard.cornerRadius),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
@@ -64,7 +63,7 @@ fun RegisterSuccessScreen(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(AppSpacing.sectionSpacing),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxSize().padding(AppSpacing.cardPadding)
+                    modifier = Modifier.fillMaxSize().padding(AppSpacing.DialogCard.padding)
                 ) {
                     Surface(
                         shape = CircleShape,

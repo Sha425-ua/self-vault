@@ -4,12 +4,21 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object AppSpacing {
+    object DialogCard {
+        val width: Dp = 400.dp
+        val height: Dp = 550.dp
+        val padding: Dp = 32.dp
+        val cornerRadius: Dp = 32.dp
+        val elevation: Dp = 8.dp
+    }
 
-    val cardWidth: Dp = 400.dp
-    val cardHeight: Dp = 550.dp
-    val cardPadding: Dp = 32.dp
-    val cardCornerRadius: Dp = 32.dp
-    val cardElevation: Dp = 8.dp
+    object ItemCard {
+        val outerRadius: Dp = 24.dp
+        val innerRadius: Dp = 4.dp
+        val itemGap: Dp = 2.dp
+        val horizontalPadding: Dp = 16.dp
+        val verticalPadding: Dp = 12.dp
+    }
 
     val sectionSpacing: Dp = 24.dp
 

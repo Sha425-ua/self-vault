@@ -22,7 +22,7 @@ class SecretListViewModel(
         val masterKey = sessionManager.getMasterKeyCopy()
 
         try {
-            var secretTitleList = secretService.listSecrets(username, masterKey)
+            val secretTitleList = secretService.listSecrets(username, masterKey)
             state = state.copy(
                 isLoading = false,
                 errorMessage = null,

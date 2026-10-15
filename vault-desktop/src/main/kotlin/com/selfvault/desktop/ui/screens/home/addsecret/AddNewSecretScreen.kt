@@ -66,7 +66,7 @@ fun AddNewSecretScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(AppSpacing.cardPadding)
+                .padding(AppSpacing.DialogCard.padding)
         ) {
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -74,7 +74,7 @@ fun AddNewSecretScreen(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     FilledTonalIconButton(
-                        onClick = { },
+                        onClick = onClick,
                         modifier = Modifier.size(40.dp)
                     ) {
                         Icon(
